@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>OmniMart PK — Admin</title>
+  <style>
+    /* Each theme sets every key dashboard color, so the whole interface changes together. */
+    :root {
+      color-scheme: light;
+      --page:#f3f6fa; --surface:#fff; --surface-alt:#f8fafc;
+      --text:#172b4d; --muted:#667085; --border:#e2e8f0;
+      --accent:#087f8c; --accent-strong:#06616b; --accent-soft:#e1f5f5;
+      --header:#111827; --success:#067647; --warning:#a65e00;
+      --danger:#b42318; --shadow:0 6px 22px #10243b12;
+      --ring:#087f8c44; --backdrop:#10182899;
+    }
+    body.theme-dark {
+      color-scheme:dark; --page:#111821; --surface:#1c2733; --surface-alt:#243341;
+      --text:#edf4fb; --muted:#a5b4c4; --border:#354658;
+      --accent:#58d6ba; --accent-strong:#35b99d; --accent-soft:#173d3a;
+      --header:#0a1018; --success:#73ddb0; --warning:#ffd080; --danger:#ff9588;
+      --shadow:0 10px 28px #0004; --ring:#58d6ba55; --backdrop:#03070dbb;
+    }
+    body.theme-blue {
+      --page:#eaf2fc; --surface:#fff; --surface-alt:#f4f8ff; --text:#152b47;
+      --muted:#5b708b; --border:#ccd9eb; --accent:#2878e5; --accent-strong:#145bb9;
+      --accent-soft:#deebff; --header:#102744; --success:#087647; --warning:#945500;
+      --danger:#b42318; --shadow:0 7px 22px #153b641a; --ring:#2878e544;
+    }
+    body.theme-green {
+      --page:#e9f3ec; --surface:#fbfffc; --surface-alt:#f1f8f2; --text:#193727;
+      --muted:#597462; --border:#c8decd; --accent:#169653; --accent-strong:#0a703b;
+      --accent-soft:#dcf2e3; --header:#153b27; --success:#087443; --warning:#8a5700;
+      --danger:#b42318; --shadow:0 7px 22px #163c2618; --ring:#16965344;
+    }
+    body.theme-purple {
+      --page:#eee9f8; --surface:#fff; --surface-alt:#f8f5fd; --text:#302146;
+      --muted:#74648a; --border:#d9cfea; --accent:#8651d5; --accent-strong:#6334aa;
+      --accent-soft:#eee4ff; --header:#291741; --success:#087443; --warning:#8a5700;
+      --danger:#b42318; --shadow:0 7px 22px #39205b1c; --ring:#8651d544;
+    }
+    body.theme-orange {
+      --page:#fff0e3; --surface:#fffaf5; --surface-alt:#fff5eb; --text:#45291b;
+      --muted:#886754; --border:#efd2bd; --accent:#ed6a1b; --accent-strong:#bd4808;
+      --accent-soft:#ffe4ce; --header:#4a2415; --success:#167347; --warning:#995400;
+      --danger:#b42318; --shadow:0 7px 22px #6b35151c; --ring:#ed6a1b44;
+    }
+    body.theme-red {
+      --page:#faeaed; --surface:#fff; --surface-alt:#fff5f6; --text:#402127;
+      --muted:#805c63; --border:#ebcbd1; --accent:#d62f4c; --accent-strong:#a91c35;
+      --accent-soft:#ffe0e6; --header:#421821; --success:#087443; --warning:#8a5700;
+      --danger:#b42318; --shadow:0 7px 22px #561a261b; --ring:#d62f4c44;
+    }
+    body.theme-oled {
+      color-scheme:dark; --page:#000; --surface:#0b0b0b; --surface-alt:#151515;
+      --text:#f5f5f5; --muted:#aaa; --border:#303030; --accent:#35e65b;
+      --accent-strong:#10bd3c; --accent-soft:#102a16; --header:#000;
+      --success:#58e779; --warning:#ffd166; --danger:#ff7777;
+      --shadow:0 8px 25px #000; --ring:#35e65b55; --backdrop:#000d;
+    }
+    body.theme-cyberpunk {
+      color-scheme:dark; --page:#100b1d; --surface:#1c1430; --surface-alt:#261c3d;
+      --text:#f7efff; --muted:#c1add4; --border:#50366f; --accent:#f052e8;
+      --accent-strong:#c323c2; --accent-soft:#3d1644; --header:#080611;
+      --success:#43e6c0; --warning:#ffe66d; --danger:#ff8585;
+      --shadow:0 8px 25px #ed42e522; --ring:#f052e855; --backdrop:#080611d9;
+    }
+    body.theme-gray {
+      --page:#e8eaed; --surface:#fff; --surface-alt:#f4f5f6; --text:#25282e;
+      --muted:#696e75; --border:#cdd0d5; --accent:#555d68; --accent-strong:#363d46;
+      --accent-soft:#e5e8ec; --header:#25282d; --success:#176c46; --warning:#805000;
+      --danger:#b42318; --shadow:0 7px 22px #282d3418; --ring:#555d6844;
+    }
+    body.theme-teal {
+      --page:#e3f3f2; --surface:#faffff; --surface-alt:#edf8f8; --text:#17383b;
+      --muted:#55777a; --border:#bedbdc; --accent:#008c8c; --accent-strong:#006d70;
+      --accent-soft:#d1f0ed; --header:#103b40; --success:#087443; --warning:#8a5700;
+      --danger:#b42318; --shadow:0 7px 22px #123f421a; --ring:#008c8c44;
+    }
+    body.theme-coffee {
+      --page:#e9ded2; --surface:#fff8ef; --surface-alt:#f5ece2; --text:#3e2d22;
+      --muted:#806c5c; --border:#d9c6b3; --accent:#a66a3f; --accent-strong:#7c4928;
+      --accent-soft:#efddca; --header:#35251c; --success:#346d48; --warning:#895500;
+      --danger:#b42318; --shadow:0 7px 22px #46301e20; --ring:#a66a3f44;
+    }
+    body.theme-lavender {
+      --page:#eee9fb; --surface:#fff; --surface-alt:#f8f5ff; --text:#302448;
+      --muted:#716489; --border:#d7ccef; --accent:#8657db; --accent-strong:#6638b5;
+      --accent-soft:#eee5ff; --header:#30204b; --success:#087443; --warning:#8a5700;
+      --danger:#b42318; --shadow:0 7px 22px #3c28631b; --ring:#8657db44;
+    }
+    body.theme-rose {
+      --page:#f6e8e5; --surface:#fffaf8; --surface-alt:#fff1ed; --text:#402e2c;
+      --muted:#826b67; --border:#e8cfca; --accent:#b76e79; --accent-strong:#92515d;
+      --accent-soft:#f5dfe1; --header:#38272a; --success:#28704b; --warning:#895500;
+      --danger:#b42318; --shadow:0 7px 22px #4c22241a; --ring:#b76e7944;
+    }
+    body.theme-forest {
+      --page:#e4ede5; --surface:#f8fff9; --surface-alt:#edf5ee; --text:#1d3323;
+      --muted:#5a735f; --border:#c4d7c7; --accent:#39814a; --accent-strong:#286237;
+      --accent-soft:#d9ecd9; --header:#142b1b; --success:#167344; --warning:#855300;
+      --danger:#b42318; --shadow:0 7px 22px #193b221c; --ring:#39814a44;
+    }
+
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--page); color:var(--text); font:14px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; transition:background .25s,color .25s; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    a { color:inherit; text-decoration:none; }
+    h1,h2,h3,p { margin-top:0; }
+
+    .topbar { position:sticky; top:0; z-index:10; background:var(--header); color:#fff; box-shadow:0 5px 22px #10182830; backdrop-filter:blur(14px); }
+    .nav { min-height:68px; max-width:1440px; margin:auto; padding:10px 20px; display:flex; align-items:center; gap:14px; }
+    .brand { display:flex; align-items:center; gap:8px; white-space:nowrap; font-weight:750; font-size:15px; }
+    .brand-mark { display:grid; place-items:center; width:34px; height:34px; border-radius:10px; background:var(--accent); color:#fff; }
+    .admin-badge { font-size:9px; text-transform:uppercase; background:#ffffff18; border:1px solid #ffffff28; padding:3px 7px; border-radius:20px; color:#d0d5dd; }
+    .links { display:flex; align-items:center; gap:4px; margin-right:auto; overflow:auto; scrollbar-width:thin; scrollbar-color:var(--accent) transparent; }
+    .links a { position:relative; isolation:isolate; padding:9px 10px; color:color-mix(in srgb,var(--accent) 18%,#fff); border:1px solid transparent; border-radius:10px; white-space:nowrap; font-size:14px; font-weight:700; letter-spacing:.01em; transition:color .2s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease,transform .2s ease; }
+    .links a:hover { color:#fff; background:color-mix(in srgb,var(--accent) 20%,transparent); border-color:color-mix(in srgb,var(--accent) 48%,transparent); box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent),0 6px 20px color-mix(in srgb,var(--accent) 24%,transparent),inset 0 1px 0 #ffffff35; backdrop-filter:blur(12px) saturate(145%); -webkit-backdrop-filter:blur(12px) saturate(145%); transform:translateY(-1px); }
+    .links a.active,.links a.active:hover { color:#fff; background:var(--accent); border-color:color-mix(in srgb,var(--accent-strong) 50%,transparent); box-shadow:0 5px 16px var(--ring),inset 0 1px 0 #ffffff35; }
+    .links a:focus-visible { outline:3px solid var(--ring); outline-offset:2px; }
+    .nav-right,.profile,.theme-control { display:flex; align-items:center; gap:8px; }
+    .theme-control { background:#ffffff12; border:1px solid #ffffff2b; border-radius:8px; padding:6px 8px; color:#fff; }
+    .theme-control select { width:125px; color:#fff; background:transparent; border:0; outline:0; cursor:pointer; }
+    .theme-control option { background:#20252b; color:#fff; }
+    .avatar { display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--accent-soft); color:var(--accent-strong); font-weight:750; }
+    .profile-name { font-size:12px; white-space:nowrap; }
+    .profile-name span { display:block; color:#aeb6c2; font-size:11px; }
+    .logout { background:var(--danger); border:0; color:#fff; padding:8px 10px; border-radius:7px; font-weight:650; }
+    .container { max-width:1440px; margin:24px auto; padding:0 24px 70px; }
+    .welcome,.stat,.panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); }
+    .welcome { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:22px 24px; margin-bottom:18px; background:linear-gradient(115deg,var(--surface),var(--accent-soft)); }
+    .welcome h1 { font-size:23px; margin:0 0 5px; }
+    .welcome p { margin:0; color:var(--muted); }
+    .online { display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); padding:8px 11px; border-radius:22px; color:var(--success); font-size:12px; font-weight:650; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--success); }
+    .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-bottom:18px; }
+    .stat { padding:16px 18px; }
+    .stat-top { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:13px; }
+    .stat-icon { display:grid; place-items:center; width:34px; height:34px; background:var(--accent-soft); color:var(--accent); border-radius:10px; }
+    .stat-value { font-size:23px; font-weight:750; margin:8px 0 2px; }
+    .stat-note,.subtle { color:var(--muted); font-size:12px; }
+    .content-grid { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(280px,.9fr); gap:18px; align-items:start; }
+    .panel { padding:18px; margin-bottom:18px; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:12px; margin-bottom:13px; border-bottom:1px solid var(--border); }
+    .panel-head h2 { font-size:15px; margin:0; }
+    .actions { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:9px; }
+    .action,.button { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:9px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); font-weight:600; font-size:12px; transition:transform .16s,box-shadow .16s,background .16s; }
+    .action { justify-content:flex-start; padding:11px 10px; }
+    .action:hover,.button:hover { border-color:var(--accent); background:var(--accent-soft); transform:translateY(-1px); box-shadow:0 5px 14px var(--ring); }
+    .action-icon { color:var(--accent); font-size:17px; }
+    .button-primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .button-primary:hover { background:var(--accent-strong); color:#fff; }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; min-width:650px; }
+    th,td { text-align:left; padding:10px 9px; border-bottom:1px solid var(--border); font-size:12px; vertical-align:middle; }
+    th { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+    tbody tr:last-child td { border-bottom:0; }
+    .product-cell { display:flex; align-items:center; gap:8px; font-weight:650; }
+    .product-image { width:36px; height:36px; object-fit:cover; border:1px solid var(--border); border-radius:8px; background:var(--surface-alt); }
+    .pill { display:inline-flex; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:650; background:var(--accent-soft); color:var(--accent-strong); }
+    .pill.low { background:color-mix(in srgb,var(--warning) 14%,var(--surface)); color:var(--warning); }
+    .pill.danger { background:color-mix(in srgb,var(--danger) 12%,var(--surface)); color:var(--danger); }
+    .alert-banner { display:none; padding:11px 13px; margin-bottom:12px; border:1px solid var(--warning); border-radius:9px; background:color-mix(in srgb,var(--warning) 10%,var(--surface)); color:var(--text); font-size:12px; }
+    .alert-banner.visible { display:block; }
+    .chat-log { height:190px; overflow:auto; padding:11px; background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; margin-bottom:10px; display:flex; flex-direction:column; gap:9px; }
+    .message { max-width:92%; padding:9px 10px; border-radius:10px; background:var(--surface); border:1px solid var(--border); font-size:12px; overflow-wrap:anywhere; }
+    .message.user { align-self:flex-end; background:var(--accent-soft); }
+    .message strong { display:block; font-size:10px; color:var(--accent); }
+    .chat-form { display:flex; gap:7px; }
+    .chat-form input { min-width:0; flex:1; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:9px 10px; }
+    .send { border:0; background:var(--accent); color:#fff; border-radius:8px; padding:0 12px; font-weight:700; }
+    .hint { font-size:11px; color:var(--muted); margin:8px 0 0; }
+    .whatsapp { position:fixed; right:18px; bottom:16px; z-index:8; display:flex; align-items:center; gap:10px; background:#075e54; color:#fff; padding:9px 13px 9px 9px; border-radius:13px; box-shadow:0 8px 26px #10182835; }
+    .wa-icon { width:38px; height:38px; display:block; }
+    .wa-copy small { display:block; color:#cce9e3; font-size:10px; }
+    .wa-copy strong { font-size:12px; }
+    .footer { color:var(--muted); font-size:11px; text-align:center; padding:2px 0 10px; }
+    .modal-backdrop { position:fixed; inset:0; z-index:30; display:none; align-items:center; justify-content:center; padding:16px; background:var(--backdrop); backdrop-filter:blur(8px); }
+    .modal-backdrop.open { display:flex; }
+    .modal { width:min(100%,540px); max-height:92vh; overflow:auto; padding:23px; border:1px solid var(--border); border-radius:18px; background:linear-gradient(145deg,var(--surface),var(--surface-alt)); color:var(--text); box-shadow:0 28px 80px #0005,0 0 0 1px var(--ring); animation:modal-in .18s ease-out; }
+    /* App configuration opens as a right-side drawer inside this page. */
+    #appConfigModal { justify-content:flex-end; padding:0; }
+    #appConfigModal .modal { width:min(520px,94vw); height:100%; max-height:100%; border-radius:18px 0 0 18px; animation:drawer-in .28s cubic-bezier(.2,.8,.2,1); }
+    @keyframes drawer-in { from { opacity:.6; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
+    .feature-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .feature-grid .panel { margin:0; }
+    .inline-form { display:flex; flex-wrap:wrap; gap:8px; align-items:end; }
+    .inline-form .field { flex:1 1 130px; margin:0; }
+    .risk-high { color:var(--danger); font-weight:700; }
+    .risk-medium { color:var(--warning); font-weight:700; }
+    .shortcut-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .policy-text { min-height:90px !important; }
+    @media(max-width:780px) { .feature-grid { grid-template-columns:1fr; } }
+    @keyframes modal-in { from { opacity:0; transform:translateY(8px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+    .modal-head { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; padding-bottom:14px; margin-bottom:16px; border-bottom:1px solid var(--border); }
+    .modal-head h2 { margin:0 0 4px; font-size:19px; letter-spacing:-.02em; }
+    .modal-close { border:0; background:var(--surface-alt); color:var(--muted); font-size:22px; width:32px; height:32px; border-radius:9px; }
+    .modal-close:hover { color:var(--text); background:var(--accent-soft); }
+    .field { margin-bottom:14px; }
+    .field label { display:block; margin-bottom:6px; font-size:12px; font-weight:700; color:var(--text); }
+    .field input,.field select,.field textarea { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--text); box-shadow:inset 0 1px 2px #00000008; }
+    .field input:focus,.field select:focus,.field textarea:focus,.chat-form input:focus { outline:3px solid var(--ring); border-color:var(--accent); }
+    .field textarea { min-height:65px; resize:vertical; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:16px; }
+    .form-error { min-height:17px; margin:0; color:var(--danger); font-size:12px; }
+    .small-button { border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:6px; padding:5px 8px; font-size:11px; margin:2px; }
+    [data-dashboard-tabs][hidden] { display:none !important; }
+    .app-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .app-card { position:relative; display:flex; flex-direction:column; padding:16px; border:1px solid var(--border); border-radius:13px; background:linear-gradient(145deg,var(--surface),var(--surface-alt)); box-shadow:var(--shadow); cursor:pointer; transition:transform .18s,border-color .18s,box-shadow .18s; }
+    .app-card:hover { transform:translateY(-2px); border-color:var(--accent); box-shadow:0 12px 25px var(--ring); }
+    .app-card h3 { margin:0 0 5px; font-size:14px; padding-right:108px; }
+    .app-card p { flex:1; margin:0 0 12px; color:var(--muted); font-size:12px; }
+    .app-status { position:absolute; top:13px; right:13px; display:inline-flex; border-radius:20px; padding:4px 8px; font-size:10px; font-weight:700; }
+    .app-status.configured { color:var(--success); background:color-mix(in srgb,var(--success) 14%,var(--surface)); }
+    .app-status.required { color:var(--warning); background:color-mix(in srgb,var(--warning) 16%,var(--surface)); }
+    .chart-wrap { width:100%; min-height:250px; }
+    #salesChart { display:block; width:100%; height:250px; }
+    .toggle-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 13px; border:1px solid var(--border); border-radius:11px; background:var(--surface-alt); }
+    .toggle-label { font-size:13px; font-weight:650; }
+    .switch { position:relative; display:inline-flex; width:46px; height:26px; flex:0 0 46px; }
+    .switch input { position:absolute; opacity:0; width:1px; height:1px; }
+    .switch-track { position:absolute; inset:0; border-radius:20px; background:var(--border); transition:background .18s; }
+    .switch-track::before { content:""; position:absolute; top:3px; left:3px; height:20px; width:20px; border-radius:50%; background:#fff; box-shadow:0 1px 4px #0003; transition:transform .18s; }
+    .switch input:checked + .switch-track { background:var(--accent); }
+    .switch input:checked + .switch-track::before { transform:translateX(20px); }
+    .switch input:focus-visible + .switch-track { outline:3px solid var(--ring); outline-offset:2px; }
+
+    @media(max-width:1100px) {
+      .nav { gap:7px; }
+      .links { gap:3px; }
+      .links a { padding:7px 8px; font-size:13px; }
+      .admin-badge,.profile-name { display:none; }
+      .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .actions,.app-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    }
+    @media(max-width:780px) {
+      .nav { flex-wrap:wrap; padding:10px 14px; gap:9px; }
+      .brand { margin-right:auto; }
+      .links { order:3; width:100%; }
+      .nav-right { gap:7px; }
+      .content-grid { grid-template-columns:1fr; }
+      .container { padding:0 14px 84px; margin-top:16px; }
+      .welcome { align-items:flex-start; flex-direction:column; }
+    }
+    @media(max-width:480px) {
+      .nav { padding:9px 10px; }
+      .brand { font-size:14px; }
+      .theme-control { padding:5px; }
+      .theme-control select { width:85px; font-size:10px; }
+      .logout { font-size:0; padding:8px; }
+      .logout::after { content:"↪"; font-size:16px; }
+      .stats { gap:9px; }
+      .stat { padding:12px; }
+      .stat-value { font-size:20px; }
+      .actions,.app-grid { grid-template-columns:1fr 1fr; }
+      .panel { padding:14px; }
+      .whatsapp { right:10px; bottom:10px; }
+    }
+    @media print {
+      body * { visibility:hidden !important; }
+      #printSlip,#printSlip * { visibility:visible !important; }
+      #printSlip { display:block !important; position:absolute; inset:0; padding:30px; color:#111; background:#fff; }
+    }
+  </style>
+</head>
+<body class="theme-light">
+  <header class="topbar">
+    <div class="nav">
+      <a class="brand" href="#overview"><span class="brand-mark">▦</span><span>OmniMart PK</span><span class="admin-badge">Admin Suite</span></a>
+      <nav class="links" aria-label="Main navigation">
+        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#local-dropshipping">Dropshipping</a>
+        <a href="#customers">Customers</a><a href="#couriers">Couriers</a><a href="#cod">COD</a>
+        <a href="#apps">Apps</a><a href="#assistant">AI</a>
+      </nav>
+      <div class="nav-right">
+        <label class="theme-control" for="themeSelect">◐
+          <select id="themeSelect" aria-label="Choose dashboard theme">
+            <option value="theme-light">Light Classic</option><option value="theme-dark">Dark Pro</option>
+            <option value="theme-blue">Modern Blue</option><option value="theme-green">Emerald Green</option>
+            <option value="theme-purple">Royal Purple</option><option value="theme-orange">Sunset Orange</option>
+            <option value="theme-red">Crimson Red</option><option value="theme-oled">Midnight OLED</option>
+            <option value="theme-cyberpunk">Cyberpunk Neon</option><option value="theme-gray">Minimal Gray</option>
+            <option value="theme-teal">Ocean Teal</option><option value="theme-coffee">Coffee Warmth</option>
+            <option value="theme-lavender">Lavender Dream</option><option value="theme-rose">Rose Gold</option>
+            <option value="theme-forest">Forest Green</option>
+          </select>
+        </label>
+        <div class="profile"><div class="avatar">OM</div><div class="profile-name">OmniMart Admin<span>Store owner</span></div><button class="logout" id="logoutButton" type="button">Logout</button></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="overview">
+    <section class="welcome"><div><h1>Welcome back, Sajid!</h1><p>Manage products, customers, couriers, COD recovery, and integrations.</p></div><div class="online"><span class="dot"></span> Store is online</div></section>
+
+    <section class="stats" aria-label="Store summary">
+      <article class="stat"><div class="stat-top">Customers <span class="stat-icon">♙</span></div><p class="stat-value" id="customerCount">—</p><div class="stat-note">Customer records</div></article>
+      <article class="stat"><div class="stat-top">Orders <span class="stat-icon">▤</span></div><p class="stat-value" id="totalOrderCount">—</p><div class="stat-note">Orders in your backend</div></article>
+      <article class="stat"><div class="stat-top">COD pending payout <span class="stat-icon">₨</span></div><p class="stat-value" id="codPendingStat">—</p><div class="stat-note">Awaiting settlement</div></article>
+      <article class="stat"><div class="stat-top">Low-stock alerts <span class="stat-icon">⚠</span></div><p class="stat-value" id="lowStockCount">—</p><div class="stat-note">Below 5 units</div></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><h2>Sales Analytics</h2><span class="subtle">Illustrative weekly sales chart</span></div><span class="pill">Overview</span></div>
+      <div class="inline-form" style="margin-bottom:12px"><div class="field"><label for="salesFrom">From</label><input id="salesFrom" type="date"></div><div class="field"><label for="salesTo">To</label><input id="salesTo" type="date"></div><button class="button" id="applySalesRange" type="button">Apply range</button></div>
+      <div class="chart-wrap"><canvas id="salesChart" role="img" aria-label="Weekly sales chart"></canvas></div>
+      <p class="subtle">Replace sample values in the script with your analytics API data.</p>
+    </section>
+
+    <section class="panel" id="inventory">
+      <div class="panel-head"><h2>Low Stock &amp; Inventory Alerts</h2><span class="subtle">Alert threshold: fewer than 5 units</span></div>
+      <div class="alert-banner" id="stockAlert" role="status"></div>
+      <p class="subtle" id="productMessage">Loading product catalog…</p>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price (PKR)</th><th>Stock</th><th>Inventory</th></tr></thead><tbody id="productRows"></tbody></table></div>
+    </section>
+
+    <section class="panel" id="products">
+      <div class="panel-head"><h2>Product Catalog</h2><button class="button button-primary" id="openProductModal" type="button">＋ Add product</button></div>
+      <span class="subtle">Products are loaded from your catalog API and shown above.</span>
+    </section>
+
+    <section class="panel" id="local-dropshipping">
+      <div class="panel-head"><div><h2>Local Dropshipping Management</h2><span class="subtle">HHC Dropshipping, Markaz, Zariya, and Daraz</span></div><button class="button button-primary" id="openSupplierModal" type="button">＋ Track supplier order</button></div>
+      <p class="subtle" id="supplierMessage">Loading supplier orders…</p>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Supplier</th><th>Supplier order ID</th><th>Status</th><th>Updated</th></tr></thead><tbody id="supplierRows"></tbody></table></div>
+    </section>
+
+    <section class="panel" id="customers">
+      <div class="panel-head"><div><h2>Customer Management</h2><span class="subtle">Contact and delivery details with order history</span></div><button class="button" id="refreshCustomers" type="button">↻ Refresh</button></div>
+      <p class="subtle" id="customerMessage">Loading customers…</p>
+      <div class="table-wrap"><table><thead><tr><th>Customer</th><th>Contact</th><th>Delivery address</th><th>Total orders</th><th>Order history</th></tr></thead><tbody id="customerRows"></tbody></table></div>
+    </section>
+
+    <section class="panel" id="couriers">
+      <div class="panel-head"><div><h2>Local Courier Integration &amp; Order Management</h2><span class="subtle">TCS, Trax, Leopard, CallCourier</span></div><div><button class="button" id="refreshOrders" type="button">↻ Refresh</button> <button class="button button-primary" id="exportOrders" type="button">Export Orders to CSV</button></div></div>
+      <p class="subtle" id="orderMessage">Loading orders…</p>
+      <div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Courier</th><th>Tracking number</th><th>Status</th><th>Actions</th></tr></thead><tbody id="orderRows"></tbody></table></div>
+    </section>
+
+    <section class="panel" id="cod">
+      <div class="panel-head"><div><h2>COD Payment &amp; Recovery Tracking</h2><span class="subtle">Collected cash, pending payouts, settled amounts, and returns</span></div><button class="button" id="refreshCod" type="button">↻ Refresh</button></div>
+      <div class="stats">
+        <article class="stat"><div class="stat-top">COD collected <span class="stat-icon">₨</span></div><p class="stat-value" id="codCollected">—</p></article>
+        <article class="stat"><div class="stat-top">Pending payouts <span class="stat-icon">◷</span></div><p class="stat-value" id="codPending">—</p></article>
+        <article class="stat"><div class="stat-top">Settled amount <span class="stat-icon">✓</span></div><p class="stat-value" id="codSettled">—</p></article>
+        <article class="stat"><div class="stat-top">Returned / recovery <span class="stat-icon">↺</span></div><p class="stat-value" id="codRecovery">—</p></article>
+      </div>
+      <p class="subtle" id="codMessage">Loading COD summary…</p>
+    </section>
+
+    <section class="feature-grid" aria-label="Store operations and research tools">
+      <section class="panel" id="profitPanel"><div class="panel-head"><h2>Net Profit &amp; Margins</h2><span class="pill">Calculator</span></div><div class="inline-form"><div class="field"><label for="sellPrice">Selling price (PKR)</label><input id="sellPrice" type="number" min="0" step=".01"></div><div class="field"><label for="costPrice">Product cost (PKR)</label><input id="costPrice" type="number" min="0" step=".01"></div><div class="field"><label for="shippingCost">Shipping / fees</label><input id="shippingCost" type="number" min="0" step=".01" value="0"></div></div><p class="stat-value" id="profitResult">Enter values to calculate</p></section>
+      <section class="panel"><div class="panel-head"><h2>Courier Tracking Lookup</h2><span class="pill">Quick links</span></div><div class="field"><label for="trackingLookup">Tracking number</label><input id="trackingLookup" maxlength="100" placeholder="Enter consignment number"></div><div class="shortcut-row"><a class="button" target="_blank" rel="noopener noreferrer" href="https://www.tcsexpress.com/track/">TCS</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://trax.pk/tracking/">Trax</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://leopardscourier.com/">Leopard</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://callcourier.com.pk/">CallCourier</a></div><p class="hint">Use each courier’s official tracking page; enter the tracking number there.</p></section>
+      <section class="panel" id="fraudPanel"><div class="panel-head"><h2>RTO &amp; Customer Risk Watch</h2><span class="pill">Phone match</span></div><p class="subtle">Risk scores are inferred from loaded order statuses. COD restrictions and blocks saved here are local admin flags; configure matching server-side enforcement before relying on them.</p><p id="riskSummary" class="subtle">Waiting for orders…</p><div class="table-wrap"><table><thead><tr><th>Phone</th><th>Orders</th><th>Returns / cancels</th><th>Risk</th><th>Action</th></tr></thead><tbody id="riskRows"></tbody></table></div></section>
+      <section class="panel" id="winningProducts"><div class="panel-head"><h2>AI Winning Products &amp; Feasibility</h2><span class="pill">Research</span></div><p class="subtle">Score a product using margin, demand, competition and sourcing checks. This is a planning aid, not an AI forecast.</p><div class="inline-form"><div class="field"><label for="researchName">Product</label><input id="researchName" maxlength="120" placeholder="Product idea"></div><div class="field"><label for="researchMargin">Gross margin %</label><input id="researchMargin" type="number" min="0" max="100"></div><div class="field"><label for="researchDemand">Demand (1–5)</label><input id="researchDemand" type="number" min="1" max="5"></div><div class="field"><label for="researchCompetition">Competition (1–5)</label><input id="researchCompetition" type="number" min="1" max="5"></div><button class="button button-primary" id="scoreProduct" type="button">Score</button></div><p id="productScore" class="stat-value">No score yet</p><div class="shortcut-row"><a class="button" target="_blank" rel="noopener noreferrer" href="https://trends.google.com/trends/">Google Trends</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://www.facebook.com/ads/library/">Meta Ad Library</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://hhc.com.pk/">HHC</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://markaz.app/">Markaz</a><a class="button" target="_blank" rel="noopener noreferrer" href="https://zariya.pk/">Zariya</a></div><p class="hint">Supplier links are shortcuts; seller feeds require supplier APIs or authorized accounts.</p></section>
+      <section class="panel" id="supportPanel"><div class="panel-head"><h2>Customer Support &amp; Inquiries</h2><span class="pill">WhatsApp reply</span></div><p class="subtle">Create a reply using a customer’s phone number. Sending opens WhatsApp for review.</p><div class="field"><label for="supportPhone">Customer phone</label><input id="supportPhone" inputmode="tel" maxlength="20" placeholder="923001234567"></div><div class="field"><label for="supportReply">Reply</label><textarea id="supportReply" maxlength="1000" placeholder="Type a customer response"></textarea></div><button class="button button-primary" id="openSupportWa" type="button">Open WhatsApp reply</button><p class="hint" id="supportMessage" aria-live="polite"></p></section>
+      <section class="panel" id="policies"><div class="panel-head"><h2>Store Policies &amp; Terms</h2><span class="pill">Browser saved</span></div><div class="field"><label for="policyType">Policy</label><select id="policyType"><option value="cod">COD rules</option><option value="returns">Return policy</option><option value="delivery">Delivery policy</option><option value="privacy">Privacy policy</option><option value="terms">Terms &amp; conditions</option></select></div><div class="field"><label for="policyText">Policy text</label><textarea class="policy-text" id="policyText" maxlength="5000" placeholder="Write your store policy"></textarea></div><button class="button button-primary" id="savePolicy" type="button">Save policy</button><span id="policyMessage" class="hint" aria-live="polite"></span></section>
+    </section>
+
+    <section class="panel" id="apps">
+      <div class="panel-head"><div><h2>Apps &amp; Integrations</h2><span class="subtle">Select an app to configure its credentials and status.</span></div><span class="pill">App directory</span></div>
+      <div class="app-grid">
+        <article class="app-card" data-app-id="hhc"><span class="app-status"></span><h3>HHC Dropshipping</h3><p>Local product sourcing and supplier orders.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="markaz"><span class="app-status"></span><h3>Markaz</h3><p>Product discovery and order workflows.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="zariya"><span class="app-status"></span><h3>Zariya</h3><p>Supplier products and fulfillment references.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="tcs"><span class="app-status"></span><h3>TCS Shipping</h3><p>Shipment creation and tracking references.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="trax"><span class="app-status"></span><h3>Trax Shipping</h3><p>Shipment tracking workflows.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="leopard"><span class="app-status"></span><h3>Leopard Courier</h3><p>Courier dispatch and tracking information.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="callcourier"><span class="app-status"></span><h3>CallCourier</h3><p>Local courier dispatch details.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="whatsapp"><span class="app-status"></span><h3>WhatsApp Support</h3><p>Customer support contact integration.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="cod-verification"><span class="app-status"></span><h3>Auto-COD Verification</h3><p>Confirm cash-on-delivery orders.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="wa-cod-otp"><span class="app-status"></span><h3>Automated COD WhatsApp Verification</h3><p>Auto OTP and order confirmation to help reduce fake COD orders.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="wa-order-recovery"><span class="app-status"></span><h3>WhatsApp Order Notifications &amp; Abandoned Cart Recovery</h3><p>Automated order updates and follow-up messages for abandoned carts.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="inventory-sync"><span class="app-status"></span><h3>Smart Inventory Sync</h3><p>Synchronize stock across HHC, Markaz, and Zariya suppliers.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="meta-tiktok-analytics"><span class="app-status"></span><h3>Meta Pixel &amp; TikTok Analytics</h3><p>Configure marketing analytics tracking credentials.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="shipping-documents"><span class="app-status"></span><h3>Auto Shipping Label &amp; Invoice Generator</h3><p>Prepare one-click PDF invoices and courier shipping slips.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="sms"><span class="app-status"></span><h3>SMS Alerts</h3><p>Order and delivery notifications.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="analytics-pixel"><span class="app-status"></span><h3>Analytics Pixel</h3><p>Storefront analytics connection.</p><span class="subtle">Configure integration →</span></article>
+        <article class="app-card" data-app-id="discount-coupons"><span class="app-status"></span><h3>Discount Coupons</h3><p>Promotional codes and campaigns.</p><span class="subtle">Configure integration →</span></article>
+      </div>
+      <p class="hint">Credentials are saved in this browser only. Use server-side secret storage for production integrations.</p>
+    </section>
+
+    <div class="content-grid">
+      <section class="panel">
+        <div class="panel-head"><h2>Quick Actions</h2><span class="subtle">Common store tasks</span></div>
+        <div class="actions">
+          <a class="action" href="#customers"><span class="action-icon">♙</span>Customers</a>
+          <a class="action" href="#couriers"><span class="action-icon">➜</span>Courier tracking</a>
+          <a class="action" href="#cod"><span class="action-icon">₨</span>COD recovery</a>
+          <a class="action" href="#apps"><span class="action-icon">▦</span>Browse apps</a>
+        </div>
+      </section>
+      <aside id="assistant">
+        <section class="panel">
+          <div class="panel-head"><h2>✦ OmniMart AI Assistant</h2><span class="pill">Ready</span></div>
+          <p class="subtle">Ask a question about your dashboard or store.</p>
+          <div class="chat-log" id="chatLog" role="log" aria-live="polite"><div class="message"><strong>OmniMart AI</strong>Hello Sajid! I can help you review your dashboard.</div></div>
+          <form class="chat-form" id="chatForm"><input id="chatInput" maxlength="500" placeholder="Ask me something…" aria-label="Message the AI assistant"><button class="send" type="submit">Send</button></form>
+          <p class="hint">Demo assistant · not connected to an AI service.</p>
+        </section>
+      </aside>
+    </div>
+    <div class="footer">OmniMart PK Admin · Dashboard data loads from configured API routes</div>
+  </main>
+
+  <a class="whatsapp" href="https://wa.me/923144039790" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support: Sajid Ullah, +92 314 4039790">
+    <svg class="wa-icon" viewBox="0 0 48 48" role="img" aria-label="WhatsApp">
+      <circle cx="24" cy="24" r="23" fill="#25D366"/>
+      <path fill="#fff" d="M34.6 13.4A14.9 14.9 0 0 0 10.1 31l-1.6 7.1 7.2-1.9a14.9 14.9 0 0 0 19-22.8ZM24 35.1a12.4 12.4 0 0 1-6.3-1.7l-.5-.3-4.3 1.1 1.1-4.2-.3-.5A12.4 12.4 0 1 1 24 35.1Zm6.8-9.3c-.4-.2-2.3-1.1-2.7-1.2-.4-.1-.6-.2-.9.2-.3.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3.1-1.9-1.1-1-1.9-2.3-2.1-2.7-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.6.1-.3 0-.5 0-.7s-.9-2.1-1.3-2.9c-.3-.7-.7-.6-.9-.6h-.8c-.3 0-.7.1-1.1.5-.4.4-1.4 1.3-1.4 3.2s1.4 3.7 1.6 4c.2.3 2.7 4.1 6.5 5.7.9.4 1.6.6 2.1.7.9.3 1.7.2 2.3.1.7-.1 2.3-.9 2.6-1.8.3-.9.3-1.6.2-1.8-.1-.2-.4-.3-.8-.5Z"/>
+    </svg>
+    <span class="wa-copy"><small>WhatsApp support · Sajid Ullah</small><strong>+92 314 4039790</strong></span>
+  </a>
+
+  <!-- Product modal -->
+  <div class="modal-backdrop" id="productModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+      <div class="modal-head"><div><h2 id="productModalTitle">Add new product</h2><span class="subtle">Add a product to your catalog.</span></div><button class="modal-close" type="button" data-close="productModal" aria-label="Close">×</button></div>
+      <form id="productForm">
+        <div class="field"><label for="productName">Product name</label><input id="productName" name="name" required maxlength="120"></div>
+        <div class="field"><label for="productDescription">Description</label><textarea id="productDescription" name="description" maxlength="1000"></textarea></div>
+        <div class="field"><label for="productCategory">Category</label><input id="productCategory" name="category" value="General" required></div>
+        <div class="field"><label for="productPrice">Price (PKR)</label><input id="productPrice" name="price" type="number" min="0" step="0.01" required></div>
+        <div class="field"><label for="productStock">Stock quantity</label><input id="productStock" name="stock" type="number" min="0" step="1" value="0" required></div>
+        <div class="field"><label for="productImage">Image URL</label><input id="productImage" name="imageUrl" type="url"></div>
+        <p class="form-error" id="productError" role="alert"></p>
+        <div class="modal-actions"><button class="button" type="button" data-close="productModal">Cancel</button><button class="button button-primary" id="saveProduct" type="submit">Save product</button></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- Supplier modal -->
+  <div class="modal-backdrop" id="supplierModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="supplierModalTitle">
+      <div class="modal-head"><div><h2 id="supplierModalTitle">Track supplier order</h2><span class="subtle">Save the supplier order reference.</span></div><button class="modal-close" type="button" data-close="supplierModal" aria-label="Close">×</button></div>
+      <form id="supplierForm">
+        <div class="field"><label for="supplierProduct">Product name</label><input id="supplierProduct" name="productName" required></div>
+        <div class="field"><label for="supplierNetwork">Supplier</label><select id="supplierNetwork" name="supplier"><option>HHC Dropshipping</option><option>Markaz</option><option>Zariya</option><option>Daraz</option></select></div>
+        <div class="field"><label for="supplierOrderId">Supplier order ID</label><input id="supplierOrderId" name="supplierOrderId" required></div>
+        <div class="field"><label for="supplierStatus">Status</label><select id="supplierStatus" name="status"><option>Pending</option><option>Ordered</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select></div>
+        <p class="form-error" id="supplierError" role="alert"></p>
+        <div class="modal-actions"><button class="button" type="button" data-close="supplierModal">Cancel</button><button class="button button-primary" id="saveSupplier" type="submit">Save tracking</button></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- Courier modal -->
+  <div class="modal-backdrop" id="courierModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="courierModalTitle">
+      <div class="modal-head"><div><h2 id="courierModalTitle">Courier &amp; order status</h2><span id="courierOrderLabel" class="subtle"></span></div><button class="modal-close" type="button" data-close="courierModal" aria-label="Close">×</button></div>
+      <form id="courierForm">
+        <input id="courierOrderId" type="hidden">
+        <div class="field"><label for="courierStatus">Fulfillment status</label><select id="courierStatus"><option>Pending Confirmation</option><option>Processing</option><option>Shipped via Local Courier</option><option>Delivered</option><option>Returned</option></select></div>
+        <div class="field"><label for="courierProvider">Courier</label><select id="courierProvider"><option value="">Select courier</option><option>TCS</option><option>Trax</option><option>Leopard</option><option>CallCourier</option><option>Other</option></select></div>
+        <div class="field"><label for="courierTracking">Tracking number</label><input id="courierTracking" maxlength="100"></div>
+        <p class="form-error" id="courierError" role="alert"></p>
+        <div class="modal-actions"><button class="button" type="button" data-close="courierModal">Cancel</button><button class="button button-primary" id="saveCourier" type="submit">Save update</button></div>
+      </form>
+    </section>
+  </div>
+
+  <!-- Integration credentials modal -->
+  <div class="modal-backdrop" id="appConfigModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="appConfigTitle">
+      <div class="modal-head">
+        <div><h2 id="appConfigTitle">Configure integration</h2><span class="subtle" id="appConfigDescription">Set credentials and integration status.</span></div>
+        <button class="modal-close" type="button" data-close="appConfigModal" aria-label="Close">×</button>
+      </div>
+      <form id="appConfigForm">
+        <input type="hidden" id="appConfigId">
+        <div class="field">
+          <label for="appApiKey">API Key</label>
+          <input id="appApiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Enter API key" required>
+        </div>
+        <div class="field">
+          <label for="appAccountSecret">Secret Token</label>
+          <input id="appAccountSecret" type="password" autocomplete="off" spellcheck="false" placeholder="Enter secret token" required>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Enable integration</span>
+          <label class="switch" aria-label="Enable or disable integration">
+            <input id="appEnabled" type="checkbox">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <p class="form-error" id="appConfigError" role="alert"></p>
+        <div class="modal-actions">
+          <button class="button button-primary" type="submit">Save &amp; Connect</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div id="printSlip" hidden></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const API_BASE_URL = '';
+      const TOKEN_KEYS = ['token', 'accessToken', 'authToken'];
+      const API = {
+        products:'/api/products',
+        suppliers:'/api/local-dropshipping',
+        orders:'/api/orders',
+        customers:'/api/customers',
+        codSummary:'/api/payments/cod/summary',
+        courierUpdateSuffix:'/local-fulfillment'
+      };
+      const LOW_STOCK_THRESHOLD = 5;
+      const THEMES = [
+        'theme-light','theme-dark','theme-blue','theme-green','theme-purple',
+        'theme-orange','theme-red','theme-oled','theme-cyberpunk','theme-gray',
+        'theme-teal','theme-coffee','theme-lavender','theme-rose','theme-forest'
+      ];
+      const APP_CONFIG_KEY = 'omnimart_app_configurations';
+      const $ = id => document.getElementById(id);
+
+      function getToken() {
+        for (const key of TOKEN_KEYS) {
+          const value = localStorage.getItem(key);
+          if (value) return value;
+        }
+        return '';
+      }
+
+      function requestHeaders(json = false) {
+        const headers = {};
+        if (json) headers['Content-Type'] = 'application/json';
+        const token = getToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+        return headers;
+      }
+
+      async function apiRequest(path, options = {}) {
+        const response = await fetch(`${API_BASE_URL}${path}`, options);
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || `Request failed (${response.status}).`);
+        return data;
+      }
+
+      function asArray(data, key) {
+        if (Array.isArray(data)) return data;
+        return data && Array.isArray(data[key]) ? data[key] : [];
+      }
+
+      function applyTheme(theme) {
+        const selected = THEMES.includes(theme) ? theme : 'theme-light';
+        document.body.classList.remove(...THEMES);
+        document.body.classList.add(selected);
+        $('themeSelect').value = selected;
+        try { localStorage.setItem('omnimart_theme', selected); } catch (_) {}
+        requestAnimationFrame(drawSalesChart);
+      }
+
+      try { applyTheme(localStorage.getItem('omnimart_theme') || 'theme-light'); }
+      catch (_) { applyTheme('theme-light'); }
+
+      $('themeSelect').addEventListener('change', event => applyTheme(event.target.value));
+      $('logoutButton').addEventListener('click', () => window.location.assign('login.html'));
+
+      function openModal(id) {
+        const modal = $(id);
+        if (!modal) return;
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.querySelector('input:not([type="hidden"]),select,textarea')?.focus();
+      }
+
+      function closeModal(id) {
+        const modal = $(id);
+        if (!modal) return;
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      document.querySelectorAll('[data-close]').forEach(button => {
+        button.addEventListener('click', () => closeModal(button.dataset.close));
+      });
+
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', event => {
+          if (event.target === backdrop) closeModal(backdrop.id);
+        });
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop.open').forEach(modal => closeModal(modal.id));
+        }
+      });
+
+      $('openProductModal').addEventListener('click', () => openModal('productModal'));
+      $('openSupplierModal').addEventListener('click', () => openModal('supplierModal'));
+
+      function addCell(row, value) {
+        const td = document.createElement('td');
+        td.textContent = value == null || value === '' ? '—' : String(value);
+        row.append(td);
+        return td;
+      }
+
+      function cleanText(value) { return String(value ?? '').replace(/<[^>]*>/g, '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').trim(); }
+      document.addEventListener('input', event => {
+        if (event.target.matches('input:not([type="password"]):not([type="number"]):not([type="date"]):not([type="checkbox"]),textarea')) {
+          const cleaned = cleanText(event.target.value); if (cleaned !== event.target.value) event.target.value = cleaned;
+        }
+      });
+      const submitTimes = new Map();
+      document.querySelectorAll('form').forEach(form => form.addEventListener('submit', event => {
+        const now = Date.now(), last = submitTimes.get(form.id) || 0;
+        if (now - last < 1800) { event.preventDefault(); const error = form.querySelector('.form-error'); if (error) error.textContent = 'Please wait before submitting again.'; return; }
+        submitTimes.set(form.id, now);
+      }, true));
+
+      function updateProfit() {
+        const sell = Number($('sellPrice').value), cost = Number($('costPrice').value), fees = Number($('shippingCost').value || 0);
+        if (![sell,cost,fees].every(Number.isFinite) || sell <= 0) { $('profitResult').textContent = 'Enter values to calculate'; return; }
+        const profit = sell - cost - fees; $('profitResult').textContent = `${money(profit)} net · ${((profit / sell) * 100).toFixed(1)}% margin`;
+      }
+      ['sellPrice','costPrice','shippingCost'].forEach(id => $(id).addEventListener('input', updateProfit));
+      $('scoreProduct').addEventListener('click', () => {
+        const margin = Number($('researchMargin').value), demand = Number($('researchDemand').value), competition = Number($('researchCompetition').value);
+        if (![margin,demand,competition].every(Number.isFinite) || demand < 1 || demand > 5 || competition < 1 || competition > 5) { $('productScore').textContent = 'Enter margin, demand and competition scores.'; return; }
+        const score = Math.round(Math.max(0,Math.min(100, margin * .45 + demand * 10 + (6 - competition) * 5.5)));
+        $('productScore').textContent = `${cleanText($('researchName').value) || 'Product'}: ${score}/100 · ${score >= 70 ? 'Promising' : score >= 45 ? 'Validate further' : 'High risk'}`;
+      });
+      $('openSupportWa').addEventListener('click', () => {
+        const phone = $('supportPhone').value.replace(/\D/g, ''), message = cleanText($('supportReply').value);
+        if (phone.length < 10 || !message) { $('supportMessage').textContent = 'Enter a valid phone number and reply.'; return; }
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer'); $('supportMessage').textContent = 'WhatsApp opened. Review and send the message there.';
+      });
+      const policyKey = 'omnimart_store_policies';
+      function loadPolicy() { try { const policies = JSON.parse(localStorage.getItem(policyKey) || '{}'); $('policyText').value = policies[$('policyType').value] || ''; } catch (_) { $('policyText').value = ''; } }
+      $('policyType').addEventListener('change', loadPolicy);
+      $('savePolicy').addEventListener('click', () => { try { const all = JSON.parse(localStorage.getItem(policyKey) || '{}'); all[$('policyType').value] = cleanText($('policyText').value); localStorage.setItem(policyKey, JSON.stringify(all)); $('policyMessage').textContent = 'Saved in this browser.'; } catch (_) { $('policyMessage').textContent = 'Could not save policy.'; } }); loadPolicy();
+      $('applySalesRange').addEventListener('click', () => { const from = $('salesFrom').value, to = $('salesTo').value; if (from && to && from > to) { window.alert('Start date must be before end date.'); return; } $('salesChart').setAttribute('aria-label', `Illustrative weekly sales chart${from || to ? ` for ${from || 'any start'} to ${to || 'today'}` : ''}`); drawSalesChart(); });
+
+      function phoneKey(value) { return String(value || '').replace(/\D/g, '').replace(/^0+/, ''); }
+      function paintRiskRows(orders) {
+        const groups = new Map();
+        orders.forEach(order => { const phone = phoneKey(order.customer?.phone || order.phone || order.customerPhone); if (!phone) return; const group = groups.get(phone) || { total:0,bad:0 }; group.total++; if (/return|reject|cancel|rto|fake/.test(String(order.fulfillmentStatus || order.status || '').toLowerCase())) group.bad++; groups.set(phone,group); });
+        let blocked = new Set(); try { blocked = new Set(JSON.parse(localStorage.getItem('omnimart_phone_blocks') || '[]')); } catch (_) {}
+        const body = $('riskRows'); body.replaceChildren();
+        [...groups.entries()].forEach(([phone,data]) => { const score = Math.min(100,data.bad*35+(data.total>=4?15:0)), row = document.createElement('tr'); addCell(row,phone); addCell(row,data.total); addCell(row,data.bad); const risk=addCell(row,`${score}/100`); risk.className=score>=60?'risk-high':score>=30?'risk-medium':''; const cell=document.createElement('td'),button=document.createElement('button'); button.type='button'; button.className='small-button'; button.textContent=blocked.has(phone)?'Unblock':'Restrict COD'; button.addEventListener('click',()=>{ if(blocked.has(phone)) blocked.delete(phone); else blocked.add(phone); localStorage.setItem('omnimart_phone_blocks',JSON.stringify([...blocked])); paintRiskRows(orders); }); cell.append(button); row.append(cell); body.append(row); });
+        $('riskSummary').textContent = `${groups.size} phone number(s) assessed from loaded orders. Local restrictions do not prevent backend checkout.`;
+      }
+
+      function money(value) {
+        const amount = Number(value);
+        return Number.isFinite(amount)
+          ? `₨ ${new Intl.NumberFormat('en-PK', { maximumFractionDigits:2 }).format(amount)}`
+          : '—';
+      }
+
+      function renderProducts(products) {
+        const body = $('productRows');
+        body.replaceChildren();
+
+        products.forEach(product => {
+          const row = document.createElement('tr');
+          const productCell = document.createElement('td');
+          const wrap = document.createElement('div');
+          const name = document.createElement('span');
+          wrap.className = 'product-cell';
+          name.textContent = product.name || 'Unnamed product';
+
+          if (product.imageUrl) {
+            const image = document.createElement('img');
+            image.className = 'product-image';
+            image.alt = '';
+            image.src = product.imageUrl;
+            image.addEventListener('error', () => image.remove(), { once:true });
+            wrap.append(image);
+          }
+
+          wrap.append(name);
+          productCell.append(wrap);
+          row.append(productCell);
+          addCell(row, product.category || 'General');
+          addCell(row, money(product.price));
+          addCell(row, Number(product.stock) || 0);
+
+          const statusCell = document.createElement('td');
+          const badge = document.createElement('span');
+          const stock = Number(product.stock) || 0;
+          badge.className = stock === 0 ? 'pill danger' : stock < LOW_STOCK_THRESHOLD ? 'pill low' : 'pill';
+          badge.textContent = stock === 0 ? 'Out of stock' : stock < LOW_STOCK_THRESHOLD ? 'Low stock' : 'In stock';
+          statusCell.append(badge);
+          row.append(statusCell);
+          body.append(row);
+        });
+
+        const low = products.filter(product => Number(product.stock) < LOW_STOCK_THRESHOLD);
+        $('activeProductCount').textContent = String(products.length);
+        $('lowStockCount').textContent = String(low.length);
+        $('productMessage').textContent = `${products.length} product${products.length === 1 ? '' : 's'} loaded.`;
+
+        const alert = $('stockAlert');
+        if (low.length) {
+          alert.textContent = `Inventory warning: ${low.map(product => `${product.name || 'Unnamed product'} (${Number(product.stock) || 0})`).join(', ')} below ${LOW_STOCK_THRESHOLD} units.`;
+          alert.classList.add('visible');
+        } else {
+          alert.textContent = '';
+          alert.classList.remove('visible');
+        }
+      }
+
+      async function loadProducts() {
+        $('productMessage').textContent = 'Loading product catalog…';
+        try {
+          const result = await apiRequest(API.products);
+          renderProducts(asArray(result, 'products'));
+        } catch (error) {
+          $('productMessage').textContent = error.message;
+          $('activeProductCount').textContent = '—';
+          $('lowStockCount').textContent = '—';
+          $('stockAlert').classList.remove('visible');
+        }
+      }
+
+      $('productForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        $('productError').textContent = '';
+        if (!getToken()) {
+          $('productError').textContent = 'Login token not found in localStorage.';
+          return;
+        }
+
+        const form = new FormData(event.currentTarget);
+        const product = {
+          name:String(form.get('name') || '').trim(),
+          description:String(form.get('description') || '').trim(),
+          category:String(form.get('category') || 'General').trim(),
+          price:Number(form.get('price')),
+          stock:Number(form.get('stock')),
+          imageUrl:String(form.get('imageUrl') || '').trim()
+        };
+
+        if (!product.name || !product.category || !Number.isFinite(product.price) ||
+            product.price < 0 || !Number.isInteger(product.stock) || product.stock < 0) {
+          $('productError').textContent = 'Enter a name, category, valid price, and whole-number stock quantity.';
+          return;
+        }
+
+        const button = $('saveProduct');
+        button.disabled = true;
+        try {
+          await apiRequest(API.products, {
+            method:'POST',
+            headers:requestHeaders(true),
+            body:JSON.stringify(product)
+          });
+          closeModal('productModal');
+          event.currentTarget.reset();
+          $('productCategory').value = 'General';
+          $('productStock').value = '0';
+          await loadProducts();
+          window.alert('Product added successfully.');
+        } catch (error) {
+          $('productError').textContent = error.message;
+          window.alert(`Could not add product: ${error.message}`);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      async function loadSuppliers() {
+        $('supplierMessage').textContent = 'Loading supplier orders…';
+        try {
+          const result = await apiRequest(API.suppliers, { headers:requestHeaders() });
+          const items = asArray(result, 'supplierOrders');
+          const body = $('supplierRows');
+          body.replaceChildren();
+
+          items.forEach(item => {
+            const row = document.createElement('tr');
+            addCell(row, item.productName || item.product?.name);
+            addCell(row, item.supplier);
+            addCell(row, item.supplierOrderId);
+            addCell(row, item.status || 'Pending');
+            addCell(row, item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—');
+            body.append(row);
+          });
+          $('supplierMessage').textContent = items.length ? `${items.length} supplier order(s) tracked.` : 'No supplier orders tracked yet.';
+        } catch (error) {
+          $('supplierMessage').textContent = `${error.message} Check the configured supplier API route.`;
+        }
+      }
+
+      $('supplierForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        $('supplierError').textContent = '';
+        if (!getToken()) {
+          $('supplierError').textContent = 'Login token not found in localStorage.';
+          return;
+        }
+
+        const form = new FormData(event.currentTarget);
+        const data = {
+          productName:String(form.get('productName') || '').trim(),
+          supplier:String(form.get('supplier') || ''),
+          supplierOrderId:String(form.get('supplierOrderId') || '').trim(),
+          status:String(form.get('status') || 'Pending')
+        };
+        const button = $('saveSupplier');
+        button.disabled = true;
+        try {
+          await apiRequest(API.suppliers, { method:'POST', headers:requestHeaders(true), body:JSON.stringify(data) });
+          closeModal('supplierModal');
+          event.currentTarget.reset();
+          await loadSuppliers();
+          window.alert('Supplier tracking saved.');
+        } catch (error) {
+          $('supplierError').textContent = error.message;
+          window.alert(`Could not save supplier tracking: ${error.message}`);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      async function loadCustomers() {
+        $('customerMessage').textContent = 'Loading customers…';
+        try {
+          const result = await apiRequest(API.customers, { headers:requestHeaders() });
+          const customers = asArray(result, 'customers');
+          const body = $('customerRows');
+          body.replaceChildren();
+
+          customers.forEach(customer => {
+            const row = document.createElement('tr');
+            addCell(row, customer.name || customer.fullName || customer.customer?.name);
+            addCell(row, customer.phone || customer.contactNumber || customer.customer?.phone);
+            addCell(row, customer.address || customer.deliveryAddress || customer.customer?.address);
+            const orders = Array.isArray(customer.orders) ? customer.orders : [];
+            addCell(row, customer.totalOrders ?? customer.orderCount ?? orders.length);
+            addCell(row, orders.map(order => order.orderNumber || order._id || order.id).filter(Boolean).join(', ') || '—');
+            body.append(row);
+          });
+
+          $('customerCount').textContent = String(customers.length);
+          $('customerMessage').textContent = customers.length ? `${customers.length} customer record(s) loaded.` : 'No customers found.';
+        } catch (error) {
+          $('customerMessage').textContent = `${error.message} Check the configured customers API route.`;
+          $('customerCount').textContent = '—';
+        }
+      }
+
+      $('refreshCustomers').addEventListener('click', loadCustomers);
+
+      let currentOrders = [];
+
+      async function loadOrders() {
+        $('orderMessage').textContent = 'Loading orders…';
+        try {
+          const result = await apiRequest(API.orders, { headers:requestHeaders() });
+          currentOrders = asArray(result, 'orders');
+          const body = $('orderRows');
+          body.replaceChildren();
+          $('totalOrderCount').textContent = String(currentOrders.length);
+
+          currentOrders.forEach(order => {
+            const row = document.createElement('tr');
+            addCell(row, order.orderNumber || order._id || order.id);
+            addCell(row, order.customer?.name || order.customerName);
+            addCell(row, order.courier);
+            addCell(row, order.trackingNumber);
+            addCell(row, order.fulfillmentStatus || order.status || 'Pending Confirmation');
+
+            const actions = document.createElement('td');
+            const update = document.createElement('button');
+            update.type = 'button';
+            update.className = 'small-button';
+            update.textContent = 'Update';
+            update.addEventListener('click', () => openCourierModal(order));
+            actions.append(update);
+
+            const wa = document.createElement('button');
+            wa.type = 'button'; wa.className = 'small-button'; wa.textContent = 'WhatsApp confirm';
+            wa.addEventListener('click', () => {
+              const phone = phoneKey(order.customer?.phone || order.phone || order.customerPhone);
+              if (!phone) { window.alert('This order has no customer phone number.'); return; }
+              const msg = `Hello ${cleanText(order.customer?.name || order.customerName || '')}, please confirm order ${cleanText(order.orderNumber || order._id || order.id || '')}.`;
+              window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+            });
+            actions.append(wa);
+
+            const slip = document.createElement('button');
+            slip.type = 'button';
+            slip.className = 'small-button';
+            slip.textContent = 'Print Shipping Slip';
+            slip.addEventListener('click', () => printTrackingSlip(order));
+            actions.append(slip);
+            row.append(actions);
+            body.append(row);
+          });
+
+          paintRiskRows(currentOrders);
+
+          $('orderMessage').textContent = currentOrders.length ? `${currentOrders.length} order(s) loaded.` : 'No orders found.';
+        } catch (error) {
+          $('orderMessage').textContent = `${error.message} Check the configured orders API route.`;
+          $('totalOrderCount').textContent = '—';
+          currentOrders = [];
+          paintRiskRows(currentOrders);
+        }
+      }
+
+      function openCourierModal(order) {
+        $('courierOrderId').value = order._id || order.id || '';
+        $('courierOrderLabel').textContent = `Order ${order.orderNumber || order._id || order.id || ''}`;
+        $('courierStatus').value = order.fulfillmentStatus || order.status || 'Pending Confirmation';
+        $('courierProvider').value = order.courier || '';
+        $('courierTracking').value = order.trackingNumber || '';
+        $('courierError').textContent = '';
+        openModal('courierModal');
+      }
+
+      $('courierForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        $('courierError').textContent = '';
+        const id = $('courierOrderId').value;
+        if (!id) {
+          $('courierError').textContent = 'Order ID is missing.';
+          return;
+        }
+        if (!getToken()) {
+          $('courierError').textContent = 'Login token not found in localStorage.';
+          return;
+        }
+
+        const data = {
+          fulfillmentStatus:$('courierStatus').value,
+          courier:$('courierProvider').value,
+          trackingNumber:$('courierTracking').value.trim()
+        };
+        const button = $('saveCourier');
+        button.disabled = true;
+        try {
+          await apiRequest(`${API.orders}/${encodeURIComponent(id)}${API.courierUpdateSuffix}`, {
+            method:'PATCH',
+            headers:requestHeaders(true),
+            body:JSON.stringify(data)
+          });
+          closeModal('courierModal');
+          await loadOrders();
+          window.alert('Courier and order status updated.');
+        } catch (error) {
+          $('courierError').textContent = error.message;
+          window.alert(`Could not update courier details: ${error.message}`);
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      function printTrackingSlip(order) {
+        const slip = $('printSlip');
+        const details = [
+          ['OmniMart PK — Shipping Slip', ''],
+          ['Order', order.orderNumber || order._id || order.id || '—'],
+          ['Customer', order.customer?.name || order.customerName || '—'],
+          ['Contact', order.customer?.phone || order.phone || '—'],
+          ['Delivery address', order.customer?.address || order.address || '—'],
+          ['Courier', order.courier || 'Not assigned'],
+          ['Tracking number', order.trackingNumber || 'Not assigned'],
+          ['Status', order.fulfillmentStatus || order.status || 'Pending Confirmation']
+        ];
+        slip.replaceChildren();
+        details.forEach(([label, value], index) => {
+          const line = document.createElement(index === 0 ? 'h2' : 'p');
+          line.textContent = index === 0 ? label : `${label}: ${value}`;
+          slip.append(line);
+        });
+        slip.hidden = false;
+        window.print();
+        slip.hidden = true;
+      }
+
+      function exportOrdersCsv() {
+        if (!currentOrders.length) {
+          window.alert('There are no loaded orders to export.');
+          return;
+        }
+        const headings = ['Order ID','Order Number','Customer','Phone','Address','Payment','Courier','Tracking Number','Status'];
+        const rows = currentOrders.map(order => [
+          order._id || order.id || '', order.orderNumber || '',
+          order.customer?.name || order.customerName || '',
+          order.customer?.phone || order.phone || '',
+          order.customer?.address || order.address || '',
+          order.paymentMethod || order.paymentType || 'COD',
+          order.courier || '', order.trackingNumber || '',
+          order.fulfillmentStatus || order.status || ''
+        ]);
+        const quote = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+        const csv = [headings, ...rows].map(row => row.map(quote).join(',')).join('\r\n');
+        const blob = new Blob(['\uFEFF', csv], { type:'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `omnimart-orders-${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      $('refreshOrders').addEventListener('click', loadOrders);
+      $('exportOrders').addEventListener('click', exportOrdersCsv);
+
+      function money(value) {
+        const amount = Number(value);
+        return Number.isFinite(amount)
+          ? `₨ ${new Intl.NumberFormat('en-PK', { maximumFractionDigits:2 }).format(amount)}`
+          : '—';
+      }
+
+      async function loadCodSummary() {
+        $('codMessage').textContent = 'Loading COD summary…';
+        try {
+          const result = await apiRequest(API.codSummary, { headers:requestHeaders() });
+          const summary = result.summary || result;
+          const pending = summary.pendingPayout ?? summary.pending ?? summary.pendingAmount;
+          $('codCollected').textContent = money(summary.collected ?? summary.totalCollected);
+          $('codPending').textContent = money(pending);
+          $('codSettled').textContent = money(summary.settled ?? summary.settledAmount);
+          $('codRecovery').textContent = money(summary.returned ?? summary.recovery ?? summary.returnedAmount);
+          $('codPendingStat').textContent = money(pending);
+          $('codMessage').textContent = 'COD payment summary updated from the backend.';
+        } catch (error) {
+          $('codMessage').textContent = `${error.message} Check the configured COD summary API route.`;
+          ['codCollected','codPending','codSettled','codRecovery','codPendingStat'].forEach(id => {
+            const element = $(id);
+            if (element) element.textContent = '—';
+          });
+        }
+      }
+
+      $('refreshCod').addEventListener('click', loadCodSummary);
+
+      function readAppConfigurations() {
+        try {
+          const value = JSON.parse(localStorage.getItem('omnimart_app_configurations') || '{}');
+          return value && typeof value === 'object' ? value : {};
+        } catch (_) {
+          return {};
+        }
+      }
+
+      function paintAppStatus(card, config) {
+        const badge = card.querySelector('.app-status');
+        if (!badge) return;
+
+        const configured = Boolean(config && config.apiKey && config.accountSecret);
+        badge.textContent = configured ? 'Configured' : 'Setup Required';
+        badge.classList.toggle('configured', configured);
+        badge.classList.toggle('required', !configured);
+      }
+
+      function setupApps() {
+        document.querySelectorAll('.app-card').forEach(card => {
+          const appId = card.dataset.appId;
+          paintAppStatus(card, readAppConfigurations()[appId]);
+
+          card.addEventListener('click', () => {
+            const saved = readAppConfigurations()[appId] || {};
+            $('appConfigId').value = appId;
+            $('appConfigTitle').textContent = card.querySelector('h3')?.textContent || 'Configure integration';
+            $('appApiKey').value = saved.apiKey || '';
+            $('appAccountSecret').value = saved.accountSecret || '';
+            $('appEnabled').checked = Boolean(saved.enabled);
+            $('appConfigError').textContent = '';
+            openModal('appConfigModal');
+          });
+        });
+
+        $('appConfigForm').addEventListener('submit', event => {
+          event.preventDefault();
+          const appId = $('appConfigId').value;
+          const apiKey = $('appApiKey').value.trim();
+          const accountSecret = $('appAccountSecret').value.trim();
+
+          if (!appId) {
+            $('appConfigError').textContent = 'Select an app before saving.';
+            return;
+          }
+
+          const configs = readAppConfigurations();
+          configs[appId] = {
+            apiKey,
+            accountSecret,
+            enabled: $('appEnabled').checked,
+            updatedAt: new Date().toISOString()
+          };
+
+          try {
+            localStorage.setItem('omnimart_app_configurations', JSON.stringify(configs));
+          } catch (_) {
+            $('appConfigError').textContent = 'Could not save configuration in browser storage.';
+            return;
+          }
+
+          const card = document.querySelector(`.app-card[data-app-id="${CSS.escape(appId)}"]`);
+          if (card) paintAppStatus(card, configs[appId]);
+          closeModal('appConfigModal');
+        });
+      }
+
+      function drawSalesChart() {
+        const canvas = $('salesChart');
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width) return;
+
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(rect.width * ratio);
+        canvas.height = Math.round(250 * ratio);
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, rect.width, 250);
+
+        const css = getComputedStyle(document.body);
+        const muted = css.getPropertyValue('--muted').trim();
+        const border = css.getPropertyValue('--border').trim();
+        const accent = css.getPropertyValue('--accent').trim();
+        const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        const values = [34,52,41,68,56,82,73];
+        const max = Math.max(...values) * 1.15;
+        const left = 40, right = 12, top = 14, bottom = 34;
+        const plotHeight = 250 - top - bottom;
+        const plotWidth = rect.width - left - right;
+
+        ctx.font = '11px system-ui,sans-serif';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = border;
+        ctx.fillStyle = muted;
+
+        for (let i = 0; i <= 4; i++) {
+          const y = top + plotHeight / 4 * i;
+          ctx.beginPath();
+          ctx.moveTo(left, y);
+          ctx.lineTo(rect.width - right, y);
+          ctx.stroke();
+          ctx.textAlign = 'right';
+          ctx.fillText(String(Math.round(max - max / 4 * i)), left - 8, y);
+        }
+
+        const step = plotWidth / labels.length;
+        const barWidth = Math.min(38, step * .55);
+        values.forEach((value, index) => {
+          const height = value / max * plotHeight;
+          const x = left + step * index + (step - barWidth) / 2;
+          const y = top + plotHeight - height;
+          ctx.fillStyle = accent;
+          ctx.beginPath();
+          if (ctx.roundRect) ctx.roundRect(x, y, barWidth, height, 5);
+          else ctx.rect(x, y, barWidth, height);
+          ctx.fill();
+          ctx.fillStyle = muted;
+          ctx.textAlign = 'center';
+          ctx.fillText(labels[index], x + barWidth / 2, 239);
+        });
+      }
+
+      function addChatMessage(label, text, user) {
+        const message = document.createElement('div');
+        const name = document.createElement('strong');
+        const content = document.createElement('span');
+        message.className = user ? 'message user' : 'message';
+        name.textContent = label;
+        content.textContent = text;
+        message.append(name, content);
+        $('chatLog').append(message);
+        $('chatLog').scrollTop = $('chatLog').scrollHeight;
+      }
+
+      $('chatForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const input = $('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        addChatMessage('You', text, true);
+        input.value = '';
+        window.setTimeout(() => addChatMessage('OmniMart AI', 'This demo assistant is not connected to an AI service yet.', false), 300);
+      });
+
+      // Dashboard tabs: keep each panel hidden unless its tab is active.
+      const tabLinks = Array.from(document.querySelectorAll('.links a'));
+      const tabAliases = { overview:'overview', products:'products', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
+      function markPanels(selector, tabList) {
+        document.querySelectorAll(selector).forEach(element => { element.dataset.dashboardTabs = tabList; });
+      }
+      markPanels('.welcome, .container > .stats, .container > section.panel:not([id])', 'overview');
+      markPanels('#inventory, #products', 'products');
+      markPanels('#local-dropshipping', 'dropshipping');
+      markPanels('#customers, #fraudPanel, #supportPanel', 'customers');
+      markPanels('#couriers, .feature-grid > .panel:nth-child(2)', 'couriers');
+      markPanels('#cod', 'cod');
+      markPanels('#apps', 'apps');
+      markPanels('#profitPanel, #winningProducts, #policies, #assistant', 'ai');
+      markPanels('.feature-grid', 'ai customers couriers');
+      markPanels('.content-grid', 'overview ai');
+      markPanels('.content-grid > section.panel', 'overview');
+
+      function activateDashboardTab(tab, updateAddress = false) {
+        const validTabs = ['overview','products','dropshipping','customers','couriers','cod','apps','ai'];
+        const activeTab = validTabs.includes(tab) ? tab : 'overview';
+        document.querySelectorAll('[data-dashboard-tabs]').forEach(element => {
+          const allowed = element.dataset.dashboardTabs.split(/\s+/);
+          element.hidden = !allowed.includes(activeTab);
+        });
+        tabLinks.forEach(link => {
+          const key = tabAliases[link.hash.slice(1)];
+          const active = key === activeTab;
+          link.classList.toggle('active', active);
+          if (active) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current');
+        });
+        if (updateAddress) history.pushState({dashboardTab:activeTab}, '', '#' + (activeTab === 'dropshipping' ? 'local-dropshipping' : activeTab === 'ai' ? 'assistant' : activeTab));
+      }
+      function tabFromHash() { return tabAliases[location.hash.replace(/^#/, '')] || 'overview'; }
+      document.querySelector('.brand')?.addEventListener('click', event => {
+        event.preventDefault();
+        activateDashboardTab('overview', true);
+      });      tabLinks.forEach(link => link.addEventListener('click', event => {
+        event.preventDefault();
+        activateDashboardTab(tabAliases[link.hash.slice(1)] || 'overview', true);
+      }));
+      document.querySelectorAll('.actions a[href^="#"]').forEach(link => link.addEventListener('click', event => {
+        const tab = tabAliases[link.hash.slice(1)];
+        if (!tab) return;
+        event.preventDefault();
+        activateDashboardTab(tab, true);
+      }));
+      window.addEventListener('popstate', () => activateDashboardTab(tabFromHash()));
+      activateDashboardTab(tabFromHash());
+      setupApps();
+      loadProducts();
+      loadSuppliers();
+      loadCustomers();
+      loadOrders();
+      loadCodSummary();
+      drawSalesChart();
+      window.addEventListener('resize', drawSalesChart);
+      window.addEventListener('beforeprint', drawSalesChart);
+    })();
+  </script>
+</body>
+</html>

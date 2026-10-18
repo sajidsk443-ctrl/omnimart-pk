@@ -1,0 +1,845 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <title>OmniMart PK | Shopping Made Simple</title>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f7fb;
+      --surface: rgba(255, 255, 255, .88);
+      --surface-solid: #fff;
+      --text: #182238;
+      --muted: #748097;
+      --line: rgba(104, 124, 160, .18);
+      --accent: #506be5;
+      --accent-dark: #3d56ce;
+      --accent-soft: #edf0ff;
+      --shadow: 0 18px 50px rgba(30, 47, 84, .09);
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --page: #101522;
+      --surface: rgba(28, 36, 54, .92);
+      --surface-solid: #1c2436;
+      --text: #f0f3fa;
+      --muted: #a0abc0;
+      --line: rgba(190, 204, 235, .15);
+      --accent: #9aabff;
+      --accent-dark: #b9c5ff;
+      --accent-soft: #293354;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .24);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 12% 0%, rgba(108, 141, 255, .12), transparent 34rem),
+        var(--page);
+      color: var(--text);
+      font: 15px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .site-header {
+      position: sticky;
+      z-index: 10;
+      top: 10px;
+      display: flex;
+      width: min(1200px, calc(100% - 32px));
+      min-height: 70px;
+      align-items: center;
+      gap: 24px;
+      margin: 10px auto 24px;
+      padding: 12px 18px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: inline-flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #526ff0, #42bac5);
+      color: #fff;
+    }
+
+    .brand-name, .brand-name b {
+      color: transparent;
+      background: linear-gradient(115deg, #4d69e8, #43b7c8);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .search {
+      display: flex;
+      flex: 1 1 300px;
+      align-items: center;
+      gap: 10px;
+      max-width: 440px;
+      height: 44px;
+      padding: 0 10px 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface-solid);
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .search:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent), transparent 86%);
+    }
+
+    .search-icon { color: var(--muted); font-size: 22px; line-height: 1; }
+
+    .search input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .search button {
+      padding: 7px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      cursor: pointer;
+    }
+
+    .nav-actions {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 16px;
+      margin-left: auto;
+    }
+
+    .nav-link { color: var(--muted); }
+    .nav-link:hover { color: var(--accent); }
+
+    .theme-toggle, .cart-link {
+      position: relative;
+      min-height: 40px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .cart-link {
+      display: grid;
+      width: 42px;
+      place-items: center;
+      font-size: 19px;
+    }
+
+    .cart-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      display: grid;
+      width: 18px;
+      height: 18px;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+    }
+
+    .page-shell {
+      width: min(1160px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .glass-panel {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .hero {
+      position: relative;
+      display: flex;
+      min-height: 340px;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      padding: clamp(32px, 6vw, 72px);
+      border-radius: 28px;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 600px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      margin: 0 0 14px;
+      font-size: clamp(40px, 6vw, 64px);
+      letter-spacing: -.055em;
+      line-height: 1.05;
+    }
+
+    .hero h1 span {
+      color: transparent;
+      background: linear-gradient(115deg, #4d69e8, #43b7c8);
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+
+    .hero-copy > p:not(.eyebrow) {
+      max-width: 490px;
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 13px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
+
+    .button:hover { transform: translateY(-2px); }
+
+    .button-primary {
+      background: linear-gradient(115deg, #536fe8, #4b91d9);
+      box-shadow: 0 9px 22px rgba(77, 105, 232, .22);
+      color: #fff;
+    }
+
+    .button-primary:hover {
+      background: linear-gradient(115deg, #405edb, #3783ce);
+    }
+
+    .hero-art {
+      position: relative;
+      flex: 0 0 280px;
+      width: 280px;
+      height: 230px;
+    }
+
+    .hero-orb { position: absolute; border-radius: 50%; }
+
+    .orb-one {
+      top: 0;
+      right: 28px;
+      width: 220px;
+      height: 220px;
+      background: linear-gradient(145deg, rgba(93, 127, 255, .34), rgba(70, 204, 204, .20));
+    }
+
+    .orb-two {
+      right: 0;
+      bottom: 0;
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(145deg, rgba(250, 181, 114, .32), rgba(255, 255, 255, .06));
+    }
+
+    .hero-product {
+      position: absolute;
+      top: 42px;
+      right: 75px;
+      display: grid;
+      width: 120px;
+      height: 148px;
+      place-content: center;
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(255,255,255,.42), rgba(94,115,204,.5));
+      box-shadow: 0 22px 40px rgba(52, 69, 137, .2);
+      color: #fff;
+      font-size: 38px;
+      font-weight: 850;
+      text-align: center;
+      transform: rotate(6deg);
+    }
+
+    .hero-product small { font-size: 9px; letter-spacing: .2em; }
+
+    .products-section { padding: 54px 0 76px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading .eyebrow { margin-bottom: 3px; }
+    .section-heading h2 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
+    .muted { color: var(--muted); }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 245px), 1fr));
+      justify-content: center;
+      gap: 22px;
+    }
+
+    .product-card {
+      min-width: 0;
+      overflow: hidden;
+      border-radius: 21px;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 54px rgba(30, 47, 84, .14);
+    }
+
+    .product-image {
+      position: relative;
+      display: block;
+      height: 220px;
+      overflow: hidden;
+      background: var(--accent-soft);
+    }
+
+    .product-image img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .category-pill {
+      display: inline-flex;
+      width: fit-content;
+      padding: 5px 10px;
+      border-radius: 99px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .product-image .category-pill {
+      position: absolute;
+      top: 13px;
+      left: 13px;
+      background: rgba(255,255,255,.92);
+    }
+
+    .product-info { padding: 17px; }
+    .product-title { display: block; font-weight: 750; }
+    .product-title:hover { color: var(--accent); }
+
+    .product-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .price { color: var(--accent); font-weight: 850; }
+    .button-small { min-height: 38px; padding: 0 13px; border-radius: 10px; font-size: 13px; }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 32px;
+      border-radius: 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .site-footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      padding: 36px max(24px, calc((100% - 1160px) / 2));
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .site-footer h2 { margin: 0 0 8px; color: var(--text); font-size: 17px; }
+    .site-footer p { margin: 5px 0; }
+    .footer-brand { color: var(--text); }
+    .copyright {
+      grid-column: 1 / -1;
+      padding-top: 15px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+    }
+
+    .whatsapp {
+      position: fixed;
+      z-index: 20;
+      right: 22px;
+      bottom: 22px;
+      display: grid;
+      width: 60px;
+      height: 60px;
+      place-items: center;
+      border: 3px solid rgba(255,255,255,.9);
+      border-radius: 50%;
+      background: #25d366;
+      box-shadow: 0 8px 24px rgba(20, 160, 85, .3);
+      color: #fff;
+      transition: transform .18s ease;
+    }
+
+    .whatsapp:hover { transform: scale(1.06); }
+
+    .whatsapp svg { width: 30px; height: 30px; fill: currentColor; }
+
+    .whatsapp::after {
+      position: absolute;
+      z-index: -1;
+      inset: -5px;
+      border: 2px solid rgba(37, 211, 102, .5);
+      border-radius: 50%;
+      content: "";
+      animation: whatsapp-pulse 2.4s ease-out infinite;
+    }
+
+    @keyframes whatsapp-pulse {
+      0% { opacity: .7; transform: scale(.92); }
+      100% { opacity: 0; transform: scale(1.42); }
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 30;
+      top: 94px;
+      left: 50%;
+      width: min(600px, calc(100% - 32px));
+      padding: 15px 42px 15px 18px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--surface-solid);
+      box-shadow: var(--shadow);
+      color: var(--text);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -14px);
+      transition: transform .28s ease, opacity .28s ease;
+    }
+
+    .toast.is-visible { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+    .toast button {
+      position: absolute;
+      top: 7px;
+      right: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .order-dialog {
+      width: min(520px, calc(100% - 28px));
+      max-height: calc(100% - 28px);
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--surface-solid);
+      box-shadow: var(--shadow);
+      color: var(--text);
+    }
+
+    .order-dialog::backdrop { background: rgba(14, 20, 34, .52); backdrop-filter: blur(5px); }
+    .order-form, .success-panel { position: relative; display: grid; gap: 13px; padding: 30px; }
+    .order-form h2, .success-panel h2 { margin: 0; font-size: 27px; }
+    .order-form .eyebrow { margin: 0; }
+    .dialog-product { margin: -8px 0 0; color: var(--muted); }
+    .order-form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; }
+
+    .order-form input, .order-form textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      outline: 0;
+      background: var(--page);
+      color: var(--text);
+      font: inherit;
+      resize: vertical;
+    }
+
+    .order-form input:focus, .order-form textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 86%);
+    }
+
+    .dialog-close {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    .form-error { min-height: 1em; margin: 0; color: #c74747; font-size: 13px; }
+    .button-full { width: 100%; }
+    .success-panel { justify-items: center; padding: 38px 30px; text-align: center; }
+    .success-icon {
+      display: grid;
+      width: 54px;
+      height: 54px;
+      place-items: center;
+      border-radius: 50%;
+      background: #27a878;
+      color: #fff;
+      font-size: 27px;
+    }
+    .success-panel p { margin: 0 0 8px; line-height: 1.9; }
+    [hidden] { display: none !important; }
+
+    a:focus-visible, button:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 850px) {
+      .site-header { flex-wrap: wrap; gap: 12px; }
+      .search { order: 3; flex-basis: 100%; max-width: none; }
+      .nav-actions { gap: 10px; }
+      .hero-art { width: 220px; flex-basis: 220px; transform: scale(.85); transform-origin: right center; }
+    }
+
+    @media (max-width: 620px) {
+      .page-shell { width: min(calc(100% - 28px), 1160px); }
+      .site-header { top: 6px; width: calc(100% - 16px); margin: 8px auto 18px; padding: 10px 12px; }
+      .brand { font-size: 15px; }
+      .brand-mark { width: 32px; height: 32px; }
+      .nav-actions { gap: 7px; }
+      .nav-link { display: none; }
+      .hero { min-height: 0; padding: 32px 24px; }
+      .hero-art { display: none; }
+      .hero h1 { font-size: 42px; }
+      .products-section { padding: 42px 0 55px; }
+      .section-heading h2 { font-size: 25px; }
+      .product-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 14px; }
+      .product-image { height: 180px; }
+      .product-info { padding: 13px; }
+      .product-bottom { align-items: flex-start; flex-direction: column; }
+      .site-footer { grid-template-columns: 1fr; padding: 28px 22px; }
+      .copyright { grid-column: auto; }
+      .toast { top: 84px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="OmniMart PK home">
+      <span class="brand-mark">O</span>
+      <span class="brand-name">OmniMart <b>PK</b></span>
+    </a>
+
+    <form class="search" action="/" method="get" role="search">
+      <span class="search-icon" aria-hidden="true">⌕</span>
+      <input name="q" type="search" placeholder="Search products" aria-label="Search products">
+      <button type="submit">Search</button>
+    </form>
+
+    <nav class="nav-actions" aria-label="Main navigation">
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="/admin.html">Admin</a>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch color theme">
+        <span id="themeIcon" aria-hidden="true">☾</span>
+        <span class="theme-label">Theme</span>
+      </button>
+      <a class="cart-link" href="#products" aria-label="Shopping cart">
+        <span aria-hidden="true">🛒</span><span class="cart-badge" id="cartCount">0</span>
+      </a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero glass-panel" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <p class="eyebrow">A better way to shop</p>
+        <h1 id="heroTitle">Shopping Made <span>Simple</span></h1>
+        <p>Quality products delivered across Pakistan. Cash on Delivery available.</p>
+        <a class="button button-primary" href="#products">Shop Now <span aria-hidden="true">→</span></a>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-orb orb-one"></div>
+        <div class="hero-orb orb-two"></div>
+        <div class="hero-product">OM<br><small>PAKISTAN</small></div>
+      </div>
+    </section>
+
+    <section class="products-section" id="products" aria-labelledby="productsTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Handpicked for you</p>
+          <h2 id="productsTitle">Popular Products</h2>
+        </div>
+        <span class="muted"><%= Array.isArray(products) ? products.length : 0 %> products</span>
+      </div>
+
+      <div class="product-grid">
+        <% if (Array.isArray(products) && products.length > 0) { %>
+          <% products.forEach((product) => { %>
+            <article class="product-card glass-panel">
+              <a class="product-image" href="/product/<%= encodeURIComponent(product.id) %>">
+                <img
+                  src="<%= product.image || 'https://placehold.co/700x500/eef1ff/5268c9?text=OmniMart+PK' %>"
+                  alt="<%= product.title %>"
+                  loading="lazy">
+                <span class="category-pill"><%= product.category || 'Featured' %></span>
+              </a>
+
+              <div class="product-info">
+                <a class="product-title" href="/product/<%= encodeURIComponent(product.id) %>">
+                  <%= product.title %>
+                </a>
+                <div class="product-bottom">
+                  <strong class="price">PKR <%= Number(product.price || 0).toLocaleString("en-PK") %></strong>
+                  <button
+                    class="button button-small button-primary"
+                    type="button"
+                    data-buy
+                    data-id="<%= product.id %>"
+                    data-title="<%= product.title %>"
+                    data-price="<%= Number(product.price || 0) %>">
+                    Buy It Now
+                  </button>
+                </div>
+              </div>
+            </article>
+          <% }); %>
+        <% } else { %>
+          <div class="empty-state glass-panel">
+            Products will appear here once they have been added to the catalog.
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <a class="brand footer-brand" href="/">
+        <span class="brand-name">OmniMart <b>PK</b></span>
+      </a>
+      <p>Everyday shopping, delivered across Pakistan.</p>
+    </div>
+    <div>
+      <h2>Contact Us</h2>
+      <p>Email: <a href="mailto:support@omnimart.pk">support@omnimart.pk</a></p>
+      <p>Phone: <a href="tel:+923001234567">+92 300 1234567</a></p>
+      <p>Cash on Delivery available nationwide.</p>
+    </div>
+    <p class="copyright">© <%= new Date().getFullYear() %> OmniMart PK. All rights reserved.</p>
+  </footer>
+
+  <a
+    class="whatsapp"
+    href="https://wa.me/923001234567?text=Hi%20OmniMart%20PK,%20I%20want%20to%20inquire%20about%20a%20product"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Chat with OmniMart PK on WhatsApp">
+    <svg viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M19.11 17.23c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.11 3.22 5.11 4.52.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.35M16.05 27h-.01a11 11 0 0 1-5.61-1.54l-.4-.24-4.17 1.09 1.11-4.06-.26-.42A10.94 10.94 0 0 1 5.03 16c0-6.06 4.94-10.99 11.01-10.99 2.94 0 5.7 1.15 7.77 3.22A10.92 10.92 0 0 1 27.03 16c0 6.06-4.93 11-10.98 11m9.34-20.4A13.13 13.13 0 0 0 16.04 2.5C8.59 2.5 2.53 8.56 2.53 16c0 2.38.62 4.7 1.81 6.74l-1.93 7.05 7.22-1.89A13.45 13.45 0 0 0 16.04 29.5h.01c7.44 0 13.5-6.06 13.5-13.5 0-3.61-1.4-7-4.16-9.4Z"/>
+    </svg>
+  </a>
+
+  <div class="toast" id="welcomeToast" role="status">
+    Welcome to OmniMart PK! Enjoy Fast Delivery &amp; Cash on Delivery across Pakistan 🚚
+    <button type="button" aria-label="Dismiss welcome message" data-dismiss-toast>×</button>
+  </div>
+
+  <dialog class="order-dialog" id="orderDialog" aria-labelledby="orderTitle">
+    <form id="orderForm" class="order-form">
+      <button class="dialog-close" type="button" aria-label="Close order form" data-close-dialog>×</button>
+      <p class="eyebrow">Cash on Delivery</p>
+      <h2 id="orderTitle">Place your order</h2>
+      <p class="dialog-product" id="dialogProduct"></p>
+      <input type="hidden" name="productId" id="orderProductId">
+
+      <label>Full Name (پورا نام)
+        <input name="name" autocomplete="name" required>
+      </label>
+      <label>Phone Number (رابطہ نمبر)
+        <input name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+      </label>
+      <label>Complete Address (مکمل پتہ)
+        <textarea name="address" autocomplete="street-address" rows="3" required></textarea>
+      </label>
+      <label>City (شہر)
+        <input name="city" autocomplete="address-level2" required>
+      </label>
+
+      <p class="form-error" id="formError" role="alert"></p>
+      <button class="button button-primary button-full" type="submit">Confirm COD Order</button>
+    </form>
+
+    <section class="success-panel" id="orderSuccess" hidden role="status">
+      <div class="success-icon" aria-hidden="true">✓</div>
+      <h2>شکریہ!</h2>
+      <p>آپ کا بہت بہت شکریہ ہمارے آن لائن سٹور OmniMart PK پر بھروسہ کر کے ہم سے شاپنگ کرنے کا! آپ کا آرڈر کامیابی سے موصول ہو گیا ہے اور جلد آپ کی دہلیز پر پہنچا دیا جائے گا۔</p>
+      <button class="button button-primary" type="button" data-close-dialog>Continue shopping</button>
+    </section>
+  </dialog>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const themeToggle = document.getElementById("themeToggle");
+      const themeIcon = document.getElementById("themeIcon");
+
+      function applyTheme(theme) {
+        const selected = theme === "dark" ? "dark" : "light";
+        root.dataset.theme = selected;
+        localStorage.setItem("omnimart-theme", selected);
+        themeIcon.textContent = selected === "dark" ? "☀" : "☾";
+        themeToggle.setAttribute(
+          "aria-label",
+          `Switch to ${selected === "dark" ? "light" : "dark"} theme`
+        );
+      }
+
+      applyTheme(localStorage.getItem("omnimart-theme") || "light");
+
+      themeToggle.addEventListener("click", () => {
+        applyTheme(root.dataset.theme === "dark" ? "light" : "dark");
+      });
+
+      const toast = document.getElementById("welcomeToast");
+      if (toast && !sessionStorage.getItem("omnimart-welcomed")) {
+        requestAnimationFrame(() => toast.classList.add("is-visible"));
+        sessionStorage.setItem("omnimart-welcomed", "1");
+        window.setTimeout(() => toast.classList.remove("is-visible"), 6500);
+      }
+
+      toast.querySelector("[data-dismiss-toast]").addEventListener("click", () => {
+        toast.classList.remove("is-visible");
+      });
+
+      const dialog = document.getElementById("orderDialog");
+      const orderForm = document.getElementById("orderForm");
+      const successPanel = document.getElementById("orderSuccess");
+      const formError = document.getElementById("formError");
+
+      document.querySelectorAll("[data-buy]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.getElementById("orderProductId").value = button.dataset.id;
+          document.getElementById("dialogProduct").textContent =
+            `${button.dataset.title} · PKR ${Number(button.dataset.price).toLocaleString("en-PK")}`;
+
+          orderForm.reset();
+          document.getElementById("orderProductId").value = button.dataset.id;
+          orderForm.hidden = false;
+          successPanel.hidden = true;
+          formError.textContent = "";
+          dialog.showModal();
+        });
+      });
+
+      document.querySelectorAll("[data-close-dialog]").forEach((button) => {
+        button.addEventListener("click", () => dialog.close());
+      });
+
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+
+      orderForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        formError.textContent = "";
+
+        const submitButton = orderForm.querySelector('[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+          const response = await fetch("/orders", {
+            method: "POST",
+            body: new FormData(orderForm)
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || "Could not submit your order.");
+          }
+
+          orderForm.hidden = true;
+          successPanel.hidden = false;
+        } catch (error) {
+          formError.textContent =
+            error.message || "Could not submit your order. Please try again.";
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
