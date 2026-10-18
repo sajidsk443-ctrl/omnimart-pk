@@ -224,6 +224,29 @@ app.get('/api/products', requireAdmin, async (_req, res, next) => {
 app.post('/api/products', requireAdmin, upload.array('mediaFiles', MAX_MEDIA_FILES), (req, res, next) => {
   createProduct(req, res, next, true);
 });
+
+// Admin product deletion used by the dashboard's per-row Delete action.
+app.delete('/api/products/:id', requireAdmin, async (req, res, next) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID.' });
+    }
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
+
+    const paths = new Set([
+      ...(Array.isArray(product.mediaFiles) ? product.mediaFiles.map(item => item.path) : []),
+      ...(Array.isArray(product.media) ? product.media : [])
+    ]);
+    await Promise.all([...paths].map(mediaPath => {
+      const filename = path.basename(String(mediaPath || ''));
+      return filename ? fs.promises.unlink(path.join(UPLOAD_DIR, filename)).catch(() => {}) : Promise.resolve();
+    }));
+    return res.json({ success: true, message: 'Product deleted.' });
+  } catch (error) {
+    return next(error);
+  }
+});
 app.post('/add-product', requireAdmin, upload.array('mediaFiles', MAX_MEDIA_FILES), (req, res, next) => {
   createProduct(req, res, next, false);
 });

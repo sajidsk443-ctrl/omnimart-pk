@@ -314,7 +314,7 @@
       <div class="panel-head"><h2>Low Stock &amp; Inventory Alerts</h2><span class="subtle">Alert threshold: fewer than 5 units</span></div>
       <div class="alert-banner" id="stockAlert" role="status"></div>
       <p class="subtle" id="productMessage">Loading product catalog…</p>
-      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price (PKR)</th><th>Stock</th><th>Inventory</th></tr></thead><tbody id="productRows"></tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price (PKR)</th><th>Stock</th><th>Inventory</th><th>Actions</th></tr></thead><tbody id="productRows"></tbody></table></div>
     </section>
 
     <section class="panel" id="products">
@@ -518,6 +518,11 @@
       ];
       const APP_CONFIG_KEY = 'omnimart_app_configurations';
       const $ = id => document.getElementById(id);
+      function setTextIfPresent(id, value) {
+        const element = $(id);
+        if (element) element.textContent = String(value ?? '');
+        return element;
+      }
 
       function tokenFromValue(value) {
         if (!value) return '';
@@ -682,6 +687,10 @@
 
       function renderProducts(products) {
         const body = $('productRows');
+        if (!body) {
+          setTextIfPresent('productMessage', 'Product list is unavailable on this page.');
+          return;
+        }
         body.replaceChildren();
 
         products.forEach(product => {
@@ -715,15 +724,26 @@
           badge.textContent = stock === 0 ? 'Out of stock' : stock < LOW_STOCK_THRESHOLD ? 'Low stock' : 'In stock';
           statusCell.append(badge);
           row.append(statusCell);
+
+          const actionCell = document.createElement('td');
+          const deleteButton = document.createElement('button');
+          deleteButton.type = 'button';
+          deleteButton.className = 'small-button';
+          deleteButton.textContent = '🗑️ Delete';
+          deleteButton.setAttribute('aria-label', `Delete ${product.name || 'product'}`);
+          deleteButton.addEventListener('click', () => deleteProduct(product._id || product.id, deleteButton));
+          actionCell.append(deleteButton);
+          row.append(actionCell);
           body.append(row);
         });
 
         const low = products.filter(product => Number(product.stock) < LOW_STOCK_THRESHOLD);
-        $('activeProductCount').textContent = String(products.length);
-        $('lowStockCount').textContent = String(low.length);
-        $('productMessage').textContent = `${products.length} product${products.length === 1 ? '' : 's'} loaded.`;
+        setTextIfPresent('activeProductCount', products.length);
+        setTextIfPresent('lowStockCount', low.length);
+        setTextIfPresent('productMessage', `${products.length} product${products.length === 1 ? '' : 's'} loaded.`);
 
         const alert = $('stockAlert');
+        if (!alert) return;
         if (low.length) {
           alert.textContent = `Inventory warning: ${low.map(product => `${product.name || 'Unnamed product'} (${Number(product.stock) || 0})`).join(', ')} below ${LOW_STOCK_THRESHOLD} units.`;
           alert.classList.add('visible');
@@ -734,24 +754,51 @@
       }
 
       async function loadProducts() {
-        $('productMessage').textContent = 'Loading product catalog…';
+        setTextIfPresent('productMessage', 'Loading product catalog…');
         try {
           const result = await apiRequest(API.products, { headers:requestHeaders() });
           renderProducts(asArray(result, 'products'));
         } catch (error) {
-          $('productMessage').textContent = error.message;
-          $('activeProductCount').textContent = '—';
-          $('lowStockCount').textContent = '—';
-          $('stockAlert').classList.remove('visible');
+          setTextIfPresent('productMessage', error.message);
+          setTextIfPresent('activeProductCount', '—');
+          setTextIfPresent('lowStockCount', '—');
+          $('stockAlert')?.classList.remove('visible');
+        }
+      }
+
+      async function deleteProduct(id, button) {
+        if (!id) {
+          setTextIfPresent('productMessage', 'Could not delete this product because its ID is missing.');
+          return;
+        }
+        const productRow = button?.closest('tr');
+        const productName = productRow?.querySelector('.product-cell span')?.textContent || 'this product';
+        if (!window.confirm(`Delete ${productName}? This cannot be undone.`)) return;
+        if (!getToken()) {
+          setTextIfPresent('productMessage', 'Login token not found. Sign in again to delete products.');
+          return;
+        }
+        if (button) button.disabled = true;
+        try {
+          await apiRequest(`${API.products}/${encodeURIComponent(id)}`, {
+            method:'DELETE',
+            headers:requestHeaders()
+          });
+          if (productRow) productRow.remove();
+          await loadProducts();
+          setTextIfPresent('productMessage', `${productName} was deleted.`);
+        } catch (error) {
+          setTextIfPresent('productMessage', `Could not delete product: ${error.message}`);
+          if (button) button.disabled = false;
         }
       }
 
       $('productForm').addEventListener('submit', async event => {
         event.preventDefault();
         const formElement = event.currentTarget;
-        $('productError').textContent = '';
+        setTextIfPresent('productError', '');
         if (!getToken()) {
-          $('productError').textContent = 'Login token not found in localStorage.';
+          setTextIfPresent('productError', 'Login token not found in localStorage.');
           return;
         }
 
@@ -767,7 +814,7 @@
 
         if (!product.name || !product.category || mediaFiles.length < 1 || mediaFiles.length > 10 || !Number.isFinite(product.price) ||
             product.price < 0 || !Number.isInteger(product.stock) || product.stock < 0) {
-          $('productError').textContent = 'Enter a name, category, valid price and whole-number stock quantity, and select between 1 and 10 image or video files.';
+          setTextIfPresent('productError', 'Enter a name, category, valid price and whole-number stock quantity, and select between 1 and 10 image or video files.');
           return;
         }
 
@@ -786,7 +833,7 @@
           await loadProducts();
           window.alert('Product added successfully.');
         } catch (error) {
-          $('productError').textContent = error.message;
+          setTextIfPresent('productError', error.message);
           window.alert(`Could not add product: ${error.message}`);
         } finally {
           button.disabled = false;
