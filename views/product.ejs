@@ -97,15 +97,21 @@
     </div>
   </main>
 
+  <!-- Modal for Express COD Order (Can also be used for Product Add Form if integrated) -->
   <div class="modal-overlay" id="orderModal">
     <div class="modal-box" id="orderBox">
-      <h3 style="margin-bottom:14px">Express COD Order</h3>
-      <p style="color:var(--accent);font-weight:600;margin-bottom:14px"><%= product.name || product.title %> - PKR <%= Number(product.price||0).toLocaleString("en-PK") %></p>
-      <form onsubmit="submitOrder(event)">
-        <div class="form-group"><label>Full Name</label><input type="text" id="custName" required placeholder="آپ کا پورا نام"></div>
-        <div class="form-group"><label>Phone</label><input type="tel" id="custPhone" required placeholder="0300 1234567"></div>
-        <div class="form-group"><label>City</label><input type="text" id="custCity" required placeholder="شہر کا نام"></div>
-        <button type="submit" class="btn-primary">Confirm Order</button>
+      <h3 style="margin-bottom:14px">Add New Product (HD Gallery Upload)</h3>
+      <form action="/add-product" method="POST" enctype="multipart/form-data">
+        <div class="form-group"><label>Product Name</label><input type="text" name="name" required placeholder="پروڈکٹ کا نام"></div>
+        <div class="form-group"><label>Description</label><input type="text" name="description" required placeholder="تفصیل"></div>
+        <div class="form-group"><label>Category</label><input type="text" name="category" required placeholder="کیٹیگری"></div>
+        <div class="form-group"><label>Price (PKR)</label><input type="number" name="price" required placeholder="قیمت"></div>
+        <div class="form-group"><label>Stock Quantity</label><input type="number" name="stock" placeholder="اسٹاک مقدار"></div>
+        <div class="form-group">
+          <label>Product Image / Video (HD Gallery)</label>
+          <input type="file" name="productMedia" accept="image/*,video/*" required style="padding:6px; background:var(--page);">
+        </div>
+        <button type="submit" class="btn-primary">Upload & Add Product</button>
       </form>
     </div>
   </div>
@@ -124,17 +130,6 @@
     function openOrderModal(){ document.getElementById('orderModal').classList.add('active'); }
     function closeOrderModal(){ document.getElementById('orderModal').classList.remove('active'); }
     document.getElementById('orderModal').onclick = e => { if(e.target.id==='orderModal') closeOrderModal(); };
-
-    function submitOrder(e){
-      e.preventDefault();
-      document.getElementById('orderBox').innerHTML = `
-        <div style="text-align:center;padding:20px 10px">
-          <div style="font-size:48px;margin-bottom:12px">🎉</div>
-          <h3>آرڈر کامیاب!</h3>
-          <p style="color:var(--muted);margin:12px 0 18px">آپ کا آرڈر موصول ہو گیا۔ شکریہ کہ آپ نے OmniMart PK پر بھروسہ کیا۔ ہم جلد رابطہ کریں گے۔</p>
-          <button class="btn-primary" onclick="closeOrderModal()">بند کریں</button>
-        </div>`;
-    }
 
     function orderWhatsApp(){
       const name = "<%= (product.name || product.title || '').replace(/"/g, '\\"') %>";
