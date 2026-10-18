@@ -160,6 +160,11 @@
     tbody tr:last-child td { border-bottom:0; }
     .product-cell { display:flex; align-items:center; gap:8px; font-weight:650; }
     .product-image { width:36px; height:36px; object-fit:cover; border:1px solid var(--border); border-radius:8px; background:var(--surface-alt); }
+    .product-media-preview { display:flex; align-items:center; gap:5px; max-width:min(300px,45vw); overflow-x:auto; }
+    .product-media-preview img,.product-media-preview video { display:block; flex:0 0 52px; width:52px; height:42px; object-fit:cover; border:1px solid var(--border); border-radius:6px; background:#111; }
+    .upload-preview { display:flex; flex-wrap:wrap; gap:8px; margin-top:9px; }
+    .upload-preview figure { width:88px; margin:0; color:var(--muted); font-size:10px; }
+    .upload-preview img,.upload-preview video { display:block; width:88px; height:64px; object-fit:cover; border-radius:7px; background:#111; }
     .pill { display:inline-flex; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:650; background:var(--accent-soft); color:var(--accent-strong); }
     .pill.low { background:color-mix(in srgb,var(--warning) 14%,var(--surface)); color:var(--warning); }
     .pill.danger { background:color-mix(in srgb,var(--danger) 12%,var(--surface)); color:var(--danger); }
@@ -425,7 +430,7 @@
         <div class="field"><label for="productCategory">Category</label><input id="productCategory" name="category" value="General" required></div>
         <div class="field"><label for="productPrice">Price (PKR)</label><input id="productPrice" name="price" type="number" min="0" step="0.01" required></div>
         <div class="field"><label for="productStock">Stock quantity</label><input id="productStock" name="stock" type="number" min="0" step="1" value="0" required></div>
-        <div class="field"><label for="productMedia">HD images and promotional videos (up to 10 files)</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" multiple required></div>
+        <div class="field"><label for="productMedia">HD images and promotional videos (up to 10 files)</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" multiple required><div class="upload-preview" id="mediaPreview" aria-live="polite"></div></div>
         <p class="form-error" id="productError" role="alert"></p>
         <div class="modal-actions"><button class="button" type="button" data-close="productModal">Cancel</button><button class="button button-primary" id="saveProduct" type="submit">Save product</button></div>
       </form>
@@ -523,6 +528,30 @@
         if (element) element.textContent = String(value ?? '');
         return element;
       }
+
+      let selectedMediaPreviewUrls = [];
+      function updateMediaPreview() {
+        const input = $('productMedia');
+        const preview = $('mediaPreview');
+        if (!input || !preview) return;
+        selectedMediaPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+        selectedMediaPreviewUrls = [];
+        preview.replaceChildren();
+        Array.from(input.files || []).slice(0, 10).forEach(file => {
+          const url = URL.createObjectURL(file);
+          selectedMediaPreviewUrls.push(url);
+          const figure = document.createElement('figure');
+          const media = document.createElement(file.type.startsWith('video/') ? 'video' : 'img');
+          media.src = url;
+          if (media.tagName === 'VIDEO') { media.controls = true; media.preload = 'metadata'; media.playsInline = true; }
+          else media.alt = file.name;
+          const caption = document.createElement('figcaption');
+          caption.textContent = file.name;
+          figure.append(media, caption);
+          preview.append(figure);
+        });
+      }
+      $('productMedia')?.addEventListener('change', updateMediaPreview);
 
       function tokenFromValue(value) {
         if (!value) return '';
@@ -701,16 +730,28 @@
           wrap.className = 'product-cell';
           name.textContent = product.name || 'Unnamed product';
 
-          if (product.imageUrl) {
-            const image = document.createElement('img');
-            image.className = 'product-image';
-            image.alt = '';
-            image.src = product.imageUrl;
-            image.addEventListener('error', () => image.remove(), { once:true });
-            wrap.append(image);
-          }
-
           wrap.append(name);
+          const mediaItems = Array.isArray(product.mediaFiles) && product.mediaFiles.length
+            ? product.mediaFiles
+            : (Array.isArray(product.media) ? product.media : []);
+          if (mediaItems.length || product.imageUrl) {
+            const previews = document.createElement('div');
+            previews.className = 'product-media-preview';
+            (mediaItems.length ? mediaItems : [product.imageUrl]).forEach(item => {
+              const src = typeof item === 'string' ? item : (item.path || item.url || item.mediaPath || '');
+              if (!src) return;
+              const mime = typeof item === 'object' ? (item.mimeType || item.mimetype || '') : '';
+              const isVideo = (typeof item === 'object' && item.mediaType === 'video') || mime.startsWith('video/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(src);
+              const preview = document.createElement(isVideo ? 'video' : 'img');
+              preview.src = src;
+              preview.setAttribute('aria-label', `${product.name || 'Product'} ${isVideo ? 'video' : 'image'} preview`);
+              if (isVideo) { preview.controls = true; preview.preload = 'metadata'; preview.playsInline = true; }
+              else { preview.alt = ''; preview.loading = 'lazy'; }
+              preview.addEventListener('error', () => preview.remove(), { once:true });
+              previews.append(preview);
+            });
+            wrap.append(previews);
+          }
           productCell.append(wrap);
           row.append(productCell);
           addCell(row, product.category || 'General');
@@ -828,6 +869,7 @@
           });
           closeModal('productModal');
           formElement.reset();
+          updateMediaPreview();
           $('productCategory').value = 'General';
           $('productStock').value = '0';
           await loadProducts();

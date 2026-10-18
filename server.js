@@ -200,7 +200,7 @@ async function createProduct(req, res, next, respondWithJson) {
 // Home page: render the existing catalog with the complete media array.
 app.get('/', async (_req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 }).limit(12).lean();
+    const products = await Product.find().sort({ createdAt: -1 }).lean();
     return res.render('index', { products });
   } catch (error) {
     console.error('Error loading homepage products:', error);
