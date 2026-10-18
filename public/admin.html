@@ -748,13 +748,14 @@
 
       $('productForm').addEventListener('submit', async event => {
         event.preventDefault();
+        const formElement = event.currentTarget;
         $('productError').textContent = '';
         if (!getToken()) {
           $('productError').textContent = 'Login token not found in localStorage.';
           return;
         }
 
-        const form = new FormData(event.currentTarget);
+        const form = new FormData(formElement);
         const mediaFiles = form.getAll('mediaFiles').filter(file => file instanceof File && file.size > 0);
         const product = {
           name:String(form.get('name') || '').trim(),
@@ -779,7 +780,7 @@
             body:form
           });
           closeModal('productModal');
-          event.currentTarget.reset();
+          formElement.reset();
           $('productCategory').value = 'General';
           $('productStock').value = '0';
           await loadProducts();
@@ -817,13 +818,14 @@
 
       $('supplierForm').addEventListener('submit', async event => {
         event.preventDefault();
+        const formElement = event.currentTarget;
         $('supplierError').textContent = '';
         if (!getToken()) {
           $('supplierError').textContent = 'Login token not found in localStorage.';
           return;
         }
 
-        const form = new FormData(event.currentTarget);
+        const form = new FormData(formElement);
         const data = {
           productName:String(form.get('productName') || '').trim(),
           supplier:String(form.get('supplier') || ''),
@@ -835,7 +837,7 @@
         try {
           await apiRequest(API.suppliers, { method:'POST', headers:requestHeaders(true), body:JSON.stringify(data) });
           closeModal('supplierModal');
-          event.currentTarget.reset();
+          formElement.reset();
           await loadSuppliers();
           window.alert('Supplier tracking saved.');
         } catch (error) {
