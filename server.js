@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB حد (ایچ ڈی ویڈیوز اور تصاویر کے لیے)
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB سائز کی حد (ایچ ڈی ویڈیوز اور تصاویر کے لیے)
   fileFilter: function (req, file, cb) {
     if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
@@ -39,7 +39,7 @@ const upload = multer({
   }
 });
 
-// Home page: always render the EJS template
+// Home page: render products list
 app.get('/', async (req, res) => {
   try {
     const products = await Product.find().limit(12);
@@ -48,6 +48,11 @@ app.get('/', async (req, res) => {
     console.error('Error loading homepage products:', err);
     res.status(500).render('index', { products: [] });
   }
+});
+
+// Add Listing Page Route (Admin / Listing Form)
+app.get('/add-listing', (req, res) => {
+  res.render('add-listing');
 });
 
 // Route to handle new product creation with media upload
@@ -93,11 +98,11 @@ app.get('/product/:id', async (req, res) => {
   }
 });
 
-// Serve CSS, JavaScript, and images from public.
+// Serve CSS, JavaScript, and uploaded files from public directory.
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Connect to MongoDB, then start the server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/omnimart')
@@ -105,7 +110,7 @@ mongoose
     console.log('MongoDB Connected Successfully');
 
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`Server is running on port ${PORT}`);
     });
   })
   .catch((err) => {

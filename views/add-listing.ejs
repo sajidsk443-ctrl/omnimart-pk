@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Listing | OmniMart PK</title>
+  <style>
+    :root[data-theme="light"]{--page:#f4f7fb;--surface:rgba(255,255,255,.95);--surface-solid:#fff;--text:#0f172a;--muted:#64748b;--line:rgba(100,116,139,.15);--accent:#3b82f6;--shadow:0 10px 40px rgba(15,23,42,.08)}
+    :root[data-theme="dark"]{--page:#0b0f19;--surface:rgba(20,27,45,.92);--surface-solid:#141b2d;--text:#f1f5f9;--muted:#94a3b8;--line:rgba(255,255,255,.08);--accent:#818cf8;--shadow:0 10px 40px rgba(0,0,0,.45)}
+    *{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;background:var(--page);background-attachment:fixed;color:var(--text);font:15px/1.6 system-ui,-apple-system,sans-serif}
+    a{color:inherit;text-decoration:none}
+    .site-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:14px;padding:0 20px;height:64px;background:var(--surface);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
+    .brand{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800}
+    .brand-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-weight:800}
+    .brand b{background:linear-gradient(115deg,#3b82f6,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .container{max-width:700px;margin:40px auto;padding:30px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+    h2{font-size:24px;font-weight:800;margin-bottom:8px}
+    p.sub{color:var(--muted);font-size:14px;margin-bottom:24px}
+    .form-group{margin-bottom:18px}
+    .form-group label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+    .form-group input, .form-group textarea{width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:var(--page);color:var(--text);font-size:14.5px;outline:none}
+    .form-group textarea{resize:vertical;height:100px}
+    .file-box{border:2px dashed var(--line);padding:20px;text-align:center;border-radius:12px;background:var(--surface-solid);cursor:pointer}
+    .btn-submit{display:block;width:100%;padding:14px;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;font-size:16px;border:none;cursor:pointer;margin-top:20px;box-shadow:0 6px 20px rgba(59,130,246,.25)}
+    .nav-back{margin-left:auto;font-weight:600;font-size:14px;color:var(--accent)}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="brand-mark">O</span><span>OmniMart <b>PK</b></span></a>
+    <a href="/" class="nav-back">← Back to Home</a>
+  </header>
+
+  <div class="container">
+    <h2>Create New Product Listing</h2>
+    <p class="sub">Add your product details and upload high-definition images or videos directly from your device gallery.</p>
+    
+    <form action="/add-product" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label>Product Title / Name</label>
+        <input type="text" name="name" required placeholder="e.g. Premium Baby Hooded Towel">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" required placeholder="Enter detailed product description..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" name="category" required placeholder="e.g. General Fashion & Accessories">
+      </div>
+
+      <div class="form-group">
+        <label>Price (PKR)</label>
+        <input type="number" name="price" required placeholder="1199">
+      </div>
+
+      <div class="form-group">
+        <label>Stock Quantity</label>
+        <input type="number" name="stock" required placeholder="500">
+      </div>
+
+      <div class="form-group">
+        <label>Product Image / Video (HD Gallery Upload)</label>
+        <div class="file-box">
+          <input type="file" name="productMedia" accept="image/*,video/*" required style="border:none;background:transparent;cursor:pointer;">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Publish Listing</button>
+    </form>
+  </div>
+</body>
+</html>
