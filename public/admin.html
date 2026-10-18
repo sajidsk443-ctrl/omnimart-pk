@@ -425,7 +425,7 @@
         <div class="field"><label for="productCategory">Category</label><input id="productCategory" name="category" value="General" required></div>
         <div class="field"><label for="productPrice">Price (PKR)</label><input id="productPrice" name="price" type="number" min="0" step="0.01" required></div>
         <div class="field"><label for="productStock">Stock quantity</label><input id="productStock" name="stock" type="number" min="0" step="1" value="0" required></div>
-        <div class="field"><label for="productMedia">HD image or promotional video</label><input id="productMedia" name="mediaFile" type="file" accept="image/*,video/*" required></div>
+        <div class="field"><label for="productMedia">HD images and promotional videos (up to 10 files)</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" multiple required></div>
         <p class="form-error" id="productError" role="alert"></p>
         <div class="modal-actions"><button class="button" type="button" data-close="productModal">Cancel</button><button class="button button-primary" id="saveProduct" type="submit">Save product</button></div>
       </form>
@@ -501,7 +501,7 @@
       'use strict';
 
       const API_BASE_URL = '';
-      const TOKEN_KEYS = ['token', 'accessToken', 'authToken'];
+      const TOKEN_KEYS = ['token', 'accessToken', 'authToken', 'adminToken', 'admin_token', 'access_token', 'omnimartToken', 'user', 'admin', 'currentUser'];
       const API = {
         products:'/api/products',
         suppliers:'/api/local-dropshipping',
@@ -519,10 +519,34 @@
       const APP_CONFIG_KEY = 'omnimart_app_configurations';
       const $ = id => document.getElementById(id);
 
+      function tokenFromValue(value) {
+        if (!value) return '';
+        const raw = String(value).trim();
+        try {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed === 'string') return parsed.replace(/^Bearer\s+/i, '').trim();
+          if (parsed && typeof parsed === 'object') {
+            for (const key of ['token', 'accessToken', 'authToken', 'adminToken']) {
+              if (parsed[key]) return String(parsed[key]).replace(/^Bearer\s+/i, '').trim();
+            }
+          }
+        } catch (_) {}
+        return raw.replace(/^Bearer\s+/i, '').trim();
+      }
+
       function getToken() {
-        for (const key of TOKEN_KEYS) {
-          const value = localStorage.getItem(key);
-          if (value) return value;
+        for (const store of [localStorage, sessionStorage]) {
+          for (const key of TOKEN_KEYS) {
+            const token = tokenFromValue(store.getItem(key));
+            if (token) return token;
+          }
+          for (let i = 0; i < store.length; i++) {
+            const key = store.key(i);
+            if (key && /token|auth/i.test(key)) {
+              const token = tokenFromValue(store.getItem(key));
+              if (token) return token;
+            }
+          }
         }
         return '';
       }
@@ -712,7 +736,7 @@
       async function loadProducts() {
         $('productMessage').textContent = 'Loading product catalog…';
         try {
-          const result = await apiRequest(API.products);
+          const result = await apiRequest(API.products, { headers:requestHeaders() });
           renderProducts(asArray(result, 'products'));
         } catch (error) {
           $('productMessage').textContent = error.message;
@@ -731,18 +755,18 @@
         }
 
         const form = new FormData(event.currentTarget);
+        const mediaFiles = form.getAll('mediaFiles').filter(file => file instanceof File && file.size > 0);
         const product = {
           name:String(form.get('name') || '').trim(),
           description:String(form.get('description') || '').trim(),
           category:String(form.get('category') || 'General').trim(),
           price:Number(form.get('price')),
           stock:Number(form.get('stock')),
-          mediaFile:form.get('mediaFile')
         };
 
-        if (!product.name || !product.category || !product.mediaFile || !product.mediaFile.size || !Number.isFinite(product.price) ||
+        if (!product.name || !product.category || mediaFiles.length < 1 || mediaFiles.length > 10 || !Number.isFinite(product.price) ||
             product.price < 0 || !Number.isInteger(product.stock) || product.stock < 0) {
-          $('productError').textContent = 'Enter a name, category, valid price and whole-number stock quantity, and select an image or video file.';
+          $('productError').textContent = 'Enter a name, category, valid price and whole-number stock quantity, and select between 1 and 10 image or video files.';
           return;
         }
 
@@ -752,7 +776,7 @@
           await apiRequest(API.products, {
             method:'POST',
             headers:requestHeaders(),
-            body:formData
+            body:form
           });
           closeModal('productModal');
           event.currentTarget.reset();
