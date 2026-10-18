@@ -10,6 +10,19 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const Product = require('./models/Product');
+// User is optional at startup so the rest of the storefront remains available
+// in deployments where authentication is provided by another service.
+let User = null;
+try {
+  User = mongoose.models.User || require('./models/User');
+} catch (error) {
+  if (error.code !== 'MODULE_NOT_FOUND' || !String(error.message).includes('./models/User')) throw error;
+}
+
+let bcrypt = null;
+try { bcrypt = require('bcrypt'); } catch (_) {
+  try { bcrypt = require('bcryptjs'); } catch (_) { /* comparePassword may be provided by User */ }
+}
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -23,6 +36,58 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+function jsonAuthFailure(res, status, message) {
+  return res.status(status).json({ success: false, message });
+}
+
+async function verifyLoginPassword(user, submittedPassword) {
+  if (typeof user.comparePassword === 'function') {
+    return Boolean(await user.comparePassword(submittedPassword));
+  }
+  const storedHash = user.passwordHash || user.password;
+  if (typeof storedHash !== 'string' || !/^\$2[aby]\$/.test(storedHash) || !bcrypt) return false;
+  return bcrypt.compare(submittedPassword, storedHash);
+}
+
+// Authentication API always responds with JSON, including malformed input,
+// unavailable auth configuration, invalid credentials, and unexpected errors.
+app.post(['/api/auth/login', '/api/login'], async (req, res) => {
+  try {
+    if (!User) return jsonAuthFailure(res, 503, 'Login is not configured: models/User.js was not found.');
+    if (!JWT_SECRET) return jsonAuthFailure(res, 500, 'Login is not configured: JWT_SECRET is missing.');
+
+    const identity = String(req.body?.email || req.body?.username || req.body?.phone || req.body?.identifier || '').trim();
+    const password = req.body?.password;
+    if (!identity || typeof password !== 'string' || !password) {
+      return jsonAuthFailure(res, 400, 'Enter your email, username, or phone number and password.');
+    }
+
+    const identityFields = ['email', 'username', 'phone', 'mobile'].filter(field => User.schema.path(field));
+    if (!identityFields.length) return jsonAuthFailure(res, 500, 'User model has no supported login identity field.');
+    const identityQuery = identityFields.map(field => ({ [field]: identity }));
+    const user = await User.findOne({ $or: identityQuery }).select('+password +passwordHash');
+    if (!user || user.active === false || user.isActive === false || !(await verifyLoginPassword(user, password))) {
+      return jsonAuthFailure(res, 401, 'Invalid login credentials.');
+    }
+
+    const role = String(user.role || (user.isAdmin ? 'admin' : user.isSeller ? 'seller' : 'user')).toLowerCase();
+    const userId = user._id.toString();
+    const token = jwt.sign({ id: userId, role, isAdmin: role === 'admin' || role === 'administrator' }, JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN || '7d'
+    });
+    const safeUser = {
+      id: userId,
+      name: user.name || user.fullName || '',
+      email: user.email || '',
+      role
+    };
+    return res.status(200).json({ success: true, token, user: safeUser });
+  } catch (error) {
+    console.error('Login error:', error);
+    return jsonAuthFailure(res, 500, 'Unable to complete login right now.');
+  }
+});
 
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => callback(null, UPLOAD_DIR),
@@ -179,7 +244,23 @@ app.get('/product/:id', async (req, res) => {
 app.use('/uploads', express.static(UPLOAD_DIR, { fallthrough: false, dotfiles: 'deny' }));
 app.use(express.static(PUBLIC_DIR, { index: false }));
 
+// Do not let Express return its default HTML 404 for API URLs.
+app.use('/api', (_req, res) => jsonAuthFailure(res, 404, 'API endpoint not found.'));
+
 app.use((error, _req, res, _next) => {
+  if (_req.path && _req.path.startsWith('/api/')) {
+    if (error instanceof multer.MulterError) {
+      const tooLarge = error.code === 'LIMIT_FILE_SIZE';
+      const tooMany = error.code === 'LIMIT_FILE_COUNT';
+      return res.status(tooLarge ? 413 : 400).json({
+        success: false,
+        message: tooMany ? `You can upload at most ${MAX_MEDIA_FILES} files at once.`
+          : tooLarge ? `Each file must be no larger than ${Math.floor(MAX_FILE_SIZE / (1024 * 1024))} MB.`
+            : error.message
+      });
+    }
+    return jsonAuthFailure(res, 400, error.type === 'entity.parse.failed' ? 'Request body contains invalid JSON.' : 'Request could not be processed.');
+  }
   if (error instanceof multer.MulterError) {
     const tooLarge = error.code === 'LIMIT_FILE_SIZE';
     const tooMany = error.code === 'LIMIT_FILE_COUNT';
