@@ -271,7 +271,7 @@
     <div class="nav">
       <a class="brand" href="#overview"><span class="brand-mark">▦</span><span>OmniMart PK</span><span class="admin-badge">Admin Suite</span></a>
       <nav class="links" aria-label="Main navigation">
-        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#local-dropshipping">Dropshipping</a>
+        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#listings">Listings</a><a href="#local-dropshipping">Dropshipping</a>
         <a href="#customers">Customers</a><a href="#couriers">Couriers</a><a href="#cod">COD</a>
         <a href="#apps">Apps</a><a href="#assistant">AI</a>
       </nav>
@@ -1186,12 +1186,12 @@
 
       // Dashboard tabs: keep each panel hidden unless its tab is active.
       const tabLinks = Array.from(document.querySelectorAll('.links a'));
-      const tabAliases = { overview:'overview', products:'products', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
+      const tabAliases = { overview:'overview', products:'products', listings:'listings', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
       function markPanels(selector, tabList) {
         document.querySelectorAll(selector).forEach(element => { element.dataset.dashboardTabs = tabList; });
       }
       markPanels('.welcome, .container > .stats, .container > section.panel:not([id])', 'overview');
-      markPanels('#inventory, #products', 'products');
+      markPanels('#inventory, #products', 'products listings');
       markPanels('#local-dropshipping', 'dropshipping');
       markPanels('#customers, #fraudPanel, #supportPanel', 'customers');
       markPanels('#couriers, .feature-grid > .panel:nth-child(2)', 'couriers');
@@ -1203,7 +1203,7 @@
       markPanels('.content-grid > section.panel', 'overview');
 
       function activateDashboardTab(tab, updateAddress = false) {
-        const validTabs = ['overview','products','dropshipping','customers','couriers','cod','apps','ai'];
+        const validTabs = ['overview','products','listings','dropshipping','customers','couriers','cod','apps','ai'];
         const activeTab = validTabs.includes(tab) ? tab : 'overview';
         document.querySelectorAll('[data-dashboard-tabs]').forEach(element => {
           const allowed = element.dataset.dashboardTabs.split(/\s+/);
@@ -1221,9 +1221,12 @@
       document.querySelector('.brand')?.addEventListener('click', event => {
         event.preventDefault();
         activateDashboardTab('overview', true);
-      });      tabLinks.forEach(link => link.addEventListener('click', event => {
+      });
+      tabLinks.forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        activateDashboardTab(tabAliases[link.hash.slice(1)] || 'overview', true);
+        const tab = tabAliases[link.hash.slice(1)] || 'overview';
+        activateDashboardTab(tab, true);
+        if (tab === 'listings') openModal('productModal');
       }));
       document.querySelectorAll('.actions a[href^="#"]').forEach(link => link.addEventListener('click', event => {
         const tab = tabAliases[link.hash.slice(1)];
