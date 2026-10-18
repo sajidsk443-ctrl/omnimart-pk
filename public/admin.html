@@ -419,13 +419,13 @@
   <div class="modal-backdrop" id="productModal" aria-hidden="true">
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
       <div class="modal-head"><div><h2 id="productModalTitle">Add new product</h2><span class="subtle">Add a product to your catalog.</span></div><button class="modal-close" type="button" data-close="productModal" aria-label="Close">×</button></div>
-      <form id="productForm">
+      <form id="productForm" enctype="multipart/form-data">
         <div class="field"><label for="productName">Product name</label><input id="productName" name="name" required maxlength="120"></div>
         <div class="field"><label for="productDescription">Description</label><textarea id="productDescription" name="description" maxlength="1000"></textarea></div>
         <div class="field"><label for="productCategory">Category</label><input id="productCategory" name="category" value="General" required></div>
         <div class="field"><label for="productPrice">Price (PKR)</label><input id="productPrice" name="price" type="number" min="0" step="0.01" required></div>
         <div class="field"><label for="productStock">Stock quantity</label><input id="productStock" name="stock" type="number" min="0" step="1" value="0" required></div>
-        <div class="field"><label for="productImage">Image URL</label><input id="productImage" name="imageUrl" type="url"></div>
+        <div class="field"><label for="productMedia">HD image or promotional video</label><input id="productMedia" name="mediaFile" type="file" accept="image/*,video/*" required></div>
         <p class="form-error" id="productError" role="alert"></p>
         <div class="modal-actions"><button class="button" type="button" data-close="productModal">Cancel</button><button class="button button-primary" id="saveProduct" type="submit">Save product</button></div>
       </form>
@@ -737,12 +737,12 @@
           category:String(form.get('category') || 'General').trim(),
           price:Number(form.get('price')),
           stock:Number(form.get('stock')),
-          imageUrl:String(form.get('imageUrl') || '').trim()
+          mediaFile:form.get('mediaFile')
         };
 
-        if (!product.name || !product.category || !Number.isFinite(product.price) ||
+        if (!product.name || !product.category || !product.mediaFile || !product.mediaFile.size || !Number.isFinite(product.price) ||
             product.price < 0 || !Number.isInteger(product.stock) || product.stock < 0) {
-          $('productError').textContent = 'Enter a name, category, valid price, and whole-number stock quantity.';
+          $('productError').textContent = 'Enter a name, category, valid price and whole-number stock quantity, and select an image or video file.';
           return;
         }
 
@@ -751,8 +751,8 @@
         try {
           await apiRequest(API.products, {
             method:'POST',
-            headers:requestHeaders(true),
-            body:JSON.stringify(product)
+            headers:requestHeaders(),
+            body:formData
           });
           closeModal('productModal');
           event.currentTarget.reset();
