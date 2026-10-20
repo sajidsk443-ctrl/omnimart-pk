@@ -160,11 +160,6 @@
     tbody tr:last-child td { border-bottom:0; }
     .product-cell { display:flex; align-items:center; gap:8px; font-weight:650; }
     .product-image { width:36px; height:36px; object-fit:cover; border:1px solid var(--border); border-radius:8px; background:var(--surface-alt); }
-    .product-media-preview { display:flex; align-items:center; gap:5px; max-width:min(300px,45vw); overflow-x:auto; }
-    .product-media-preview img,.product-media-preview video { display:block; flex:0 0 52px; width:52px; height:42px; object-fit:cover; border:1px solid var(--border); border-radius:6px; background:#111; }
-    .upload-preview { display:flex; flex-wrap:wrap; gap:8px; margin-top:9px; }
-    .upload-preview figure { width:88px; margin:0; color:var(--muted); font-size:10px; }
-    .upload-preview img,.upload-preview video { display:block; width:88px; height:64px; object-fit:cover; border-radius:7px; background:#111; }
     .pill { display:inline-flex; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:650; background:var(--accent-soft); color:var(--accent-strong); }
     .pill.low { background:color-mix(in srgb,var(--warning) 14%,var(--surface)); color:var(--warning); }
     .pill.danger { background:color-mix(in srgb,var(--danger) 12%,var(--surface)); color:var(--danger); }
@@ -276,7 +271,7 @@
     <div class="nav">
       <a class="brand" href="#overview"><span class="brand-mark">▦</span><span>OmniMart PK</span><span class="admin-badge">Admin Suite</span></a>
       <nav class="links" aria-label="Main navigation">
-        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#listings">Listings</a><a href="#local-dropshipping">Dropshipping</a>
+        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#local-dropshipping">Dropshipping</a>
         <a href="#customers">Customers</a><a href="#couriers">Couriers</a><a href="#cod">COD</a>
         <a href="#apps">Apps</a><a href="#assistant">AI</a>
       </nav>
@@ -319,7 +314,7 @@
       <div class="panel-head"><h2>Low Stock &amp; Inventory Alerts</h2><span class="subtle">Alert threshold: fewer than 5 units</span></div>
       <div class="alert-banner" id="stockAlert" role="status"></div>
       <p class="subtle" id="productMessage">Loading product catalog…</p>
-      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price (PKR)</th><th>Stock</th><th>Inventory</th><th>Actions</th></tr></thead><tbody id="productRows"></tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>Product</th><th>Category</th><th>Price (PKR)</th><th>Stock</th><th>Inventory</th></tr></thead><tbody id="productRows"></tbody></table></div>
     </section>
 
     <section class="panel" id="products">
@@ -430,7 +425,7 @@
         <div class="field"><label for="productCategory">Category</label><input id="productCategory" name="category" value="General" required></div>
         <div class="field"><label for="productPrice">Price (PKR)</label><input id="productPrice" name="price" type="number" min="0" step="0.01" required></div>
         <div class="field"><label for="productStock">Stock quantity</label><input id="productStock" name="stock" type="number" min="0" step="1" value="0" required></div>
-        <div class="field"><label for="productMedia">HD images and promotional videos (up to 10 files)</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" multiple required><div class="upload-preview" id="mediaPreview" aria-live="polite"></div></div>
+        <div class="field"><label for="productMedia">HD image or promotional video</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" required></div>
         <p class="form-error" id="productError" role="alert"></p>
         <div class="modal-actions"><button class="button" type="button" data-close="productModal">Cancel</button><button class="button button-primary" id="saveProduct" type="submit">Save product</button></div>
       </form>
@@ -506,7 +501,7 @@
       'use strict';
 
       const API_BASE_URL = '';
-      const TOKEN_KEYS = ['token', 'accessToken', 'authToken', 'adminToken', 'admin_token', 'access_token', 'omnimartToken', 'user', 'admin', 'currentUser'];
+      const TOKEN_KEYS = ['omnimartToken'];
       const API = {
         products:'/api/products',
         suppliers:'/api/local-dropshipping',
@@ -523,64 +518,12 @@
       ];
       const APP_CONFIG_KEY = 'omnimart_app_configurations';
       const $ = id => document.getElementById(id);
-      function setTextIfPresent(id, value) {
-        const element = $(id);
-        if (element) element.textContent = String(value ?? '');
-        return element;
-      }
-
-      let selectedMediaPreviewUrls = [];
-      function updateMediaPreview() {
-        const input = $('productMedia');
-        const preview = $('mediaPreview');
-        if (!input || !preview) return;
-        selectedMediaPreviewUrls.forEach(url => URL.revokeObjectURL(url));
-        selectedMediaPreviewUrls = [];
-        preview.replaceChildren();
-        Array.from(input.files || []).slice(0, 10).forEach(file => {
-          const url = URL.createObjectURL(file);
-          selectedMediaPreviewUrls.push(url);
-          const figure = document.createElement('figure');
-          const media = document.createElement(file.type.startsWith('video/') ? 'video' : 'img');
-          media.src = url;
-          if (media.tagName === 'VIDEO') { media.controls = true; media.preload = 'metadata'; media.playsInline = true; }
-          else media.alt = file.name;
-          const caption = document.createElement('figcaption');
-          caption.textContent = file.name;
-          figure.append(media, caption);
-          preview.append(figure);
-        });
-      }
-      $('productMedia')?.addEventListener('change', updateMediaPreview);
-
-      function tokenFromValue(value) {
-        if (!value) return '';
-        const raw = String(value).trim();
-        try {
-          const parsed = JSON.parse(raw);
-          if (typeof parsed === 'string') return parsed.replace(/^Bearer\s+/i, '').trim();
-          if (parsed && typeof parsed === 'object') {
-            for (const key of ['token', 'accessToken', 'authToken', 'adminToken']) {
-              if (parsed[key]) return String(parsed[key]).replace(/^Bearer\s+/i, '').trim();
-            }
-          }
-        } catch (_) {}
-        return raw.replace(/^Bearer\s+/i, '').trim();
-      }
+      function setText(id, value) { const element = $(id); if (element) element.textContent = value; }
 
       function getToken() {
-        for (const store of [localStorage, sessionStorage]) {
-          for (const key of TOKEN_KEYS) {
-            const token = tokenFromValue(store.getItem(key));
-            if (token) return token;
-          }
-          for (let i = 0; i < store.length; i++) {
-            const key = store.key(i);
-            if (key && /token|auth/i.test(key)) {
-              const token = tokenFromValue(store.getItem(key));
-              if (token) return token;
-            }
-          }
+        for (const key of TOKEN_KEYS) {
+          const value = localStorage.getItem(key);
+          if (value) return value;
         }
         return '';
       }
@@ -716,10 +659,6 @@
 
       function renderProducts(products) {
         const body = $('productRows');
-        if (!body) {
-          setTextIfPresent('productMessage', 'Product list is unavailable on this page.');
-          return;
-        }
         body.replaceChildren();
 
         products.forEach(product => {
@@ -730,28 +669,16 @@
           wrap.className = 'product-cell';
           name.textContent = product.name || 'Unnamed product';
 
-          wrap.append(name);
-          const mediaItems = Array.isArray(product.mediaFiles) && product.mediaFiles.length
-            ? product.mediaFiles
-            : (Array.isArray(product.media) ? product.media : []);
-          if (mediaItems.length || product.imageUrl) {
-            const previews = document.createElement('div');
-            previews.className = 'product-media-preview';
-            (mediaItems.length ? mediaItems : [product.imageUrl]).forEach(item => {
-              const src = typeof item === 'string' ? item : (item.path || item.url || item.mediaPath || '');
-              if (!src) return;
-              const mime = typeof item === 'object' ? (item.mimeType || item.mimetype || '') : '';
-              const isVideo = (typeof item === 'object' && item.mediaType === 'video') || mime.startsWith('video/') || /\.(mp4|webm|ogg|mov)(\?|$)/i.test(src);
-              const preview = document.createElement(isVideo ? 'video' : 'img');
-              preview.src = src;
-              preview.setAttribute('aria-label', `${product.name || 'Product'} ${isVideo ? 'video' : 'image'} preview`);
-              if (isVideo) { preview.controls = true; preview.preload = 'metadata'; preview.playsInline = true; }
-              else { preview.alt = ''; preview.loading = 'lazy'; }
-              preview.addEventListener('error', () => preview.remove(), { once:true });
-              previews.append(preview);
-            });
-            wrap.append(previews);
+          if (product.imageUrl) {
+            const image = document.createElement('img');
+            image.className = 'product-image';
+            image.alt = '';
+            image.src = product.imageUrl;
+            image.addEventListener('error', () => image.remove(), { once:true });
+            wrap.append(image);
           }
+
+          wrap.append(name);
           productCell.append(wrap);
           row.append(productCell);
           addCell(row, product.category || 'General');
@@ -765,97 +692,59 @@
           badge.textContent = stock === 0 ? 'Out of stock' : stock < LOW_STOCK_THRESHOLD ? 'Low stock' : 'In stock';
           statusCell.append(badge);
           row.append(statusCell);
-
-          const actionCell = document.createElement('td');
-          const deleteButton = document.createElement('button');
-          deleteButton.type = 'button';
-          deleteButton.className = 'small-button';
-          deleteButton.textContent = '🗑️ Delete';
-          deleteButton.setAttribute('aria-label', `Delete ${product.name || 'product'}`);
-          deleteButton.addEventListener('click', () => deleteProduct(product._id || product.id, deleteButton));
-          actionCell.append(deleteButton);
-          row.append(actionCell);
           body.append(row);
         });
 
         const low = products.filter(product => Number(product.stock) < LOW_STOCK_THRESHOLD);
-        setTextIfPresent('activeProductCount', products.length);
-        setTextIfPresent('lowStockCount', low.length);
-        setTextIfPresent('productMessage', `${products.length} product${products.length === 1 ? '' : 's'} loaded.`);
+        setText('activeProductCount', String(products.length));
+        setText('lowStockCount', String(low.length));
+        setText('productMessage', `${products.length} product${products.length === 1 ? '' : 's'} loaded.`);
 
         const alert = $('stockAlert');
-        if (!alert) return;
-        if (low.length) {
+        if (alert && low.length) {
           alert.textContent = `Inventory warning: ${low.map(product => `${product.name || 'Unnamed product'} (${Number(product.stock) || 0})`).join(', ')} below ${LOW_STOCK_THRESHOLD} units.`;
           alert.classList.add('visible');
-        } else {
+        } else if (alert) {
           alert.textContent = '';
           alert.classList.remove('visible');
         }
       }
 
       async function loadProducts() {
-        setTextIfPresent('productMessage', 'Loading product catalog…');
+        setText('productMessage', 'Loading product catalog…');
         try {
-          const result = await apiRequest(API.products, { headers:requestHeaders() });
+          const result = await apiRequest(API.products);
           renderProducts(asArray(result, 'products'));
         } catch (error) {
-          setTextIfPresent('productMessage', error.message);
-          setTextIfPresent('activeProductCount', '—');
-          setTextIfPresent('lowStockCount', '—');
-          $('stockAlert')?.classList.remove('visible');
-        }
-      }
-
-      async function deleteProduct(id, button) {
-        if (!id) {
-          setTextIfPresent('productMessage', 'Could not delete this product because its ID is missing.');
-          return;
-        }
-        const productRow = button?.closest('tr');
-        const productName = productRow?.querySelector('.product-cell span')?.textContent || 'this product';
-        if (!window.confirm(`Delete ${productName}? This cannot be undone.`)) return;
-        if (!getToken()) {
-          setTextIfPresent('productMessage', 'Login token not found. Sign in again to delete products.');
-          return;
-        }
-        if (button) button.disabled = true;
-        try {
-          await apiRequest(`${API.products}/${encodeURIComponent(id)}`, {
-            method:'DELETE',
-            headers:requestHeaders()
-          });
-          if (productRow) productRow.remove();
-          await loadProducts();
-          setTextIfPresent('productMessage', `${productName} was deleted.`);
-        } catch (error) {
-          setTextIfPresent('productMessage', `Could not delete product: ${error.message}`);
-          if (button) button.disabled = false;
+          setText('productMessage', error.message);
+          setText('activeProductCount', '—');
+          setText('lowStockCount', '—');
+          const alert = $('stockAlert'); if (alert) alert.classList.remove('visible');
         }
       }
 
       $('productForm').addEventListener('submit', async event => {
         event.preventDefault();
-        const formElement = event.currentTarget;
-        setTextIfPresent('productError', '');
+        const productFormElement = event.currentTarget;
+        setText('productError', '');
         if (!getToken()) {
-          setTextIfPresent('productError', 'Login token not found in localStorage.');
+          setText('productError', 'Login token not found in localStorage.');
           return;
         }
 
-        const form = new FormData(formElement);
-        const mediaFiles = form.getAll('mediaFiles').filter(file => file instanceof File && file.size > 0);
+        const form = new FormData(productFormElement);
         const product = {
           name:String(form.get('name') || '').trim(),
           description:String(form.get('description') || '').trim(),
           category:String(form.get('category') || 'General').trim(),
           price:Number(form.get('price')),
           stock:Number(form.get('stock')),
+          mediaFile:form.get('mediaFiles')
         };
 
-        if (!product.name || !product.category || mediaFiles.length < 1 || mediaFiles.length > 10 || !Number.isFinite(product.price) ||
+        if (!product.name || !product.category || !product.mediaFile || !product.mediaFile.size || !Number.isFinite(product.price) ||
             product.price < 0 || !Number.isInteger(product.stock) || product.stock < 0) {
-          setTextIfPresent('productError', 'Enter a name, category, valid price and whole-number stock quantity, and select between 1 and 10 image or video files.');
+          setText('productError', 'Enter a name, category, valid price and whole-number stock quantity, and select an image or video file.');
           return;
         }
 
@@ -868,14 +757,13 @@
             body:form
           });
           closeModal('productModal');
-          formElement.reset();
-          updateMediaPreview();
-          $('productCategory').value = 'General';
-          $('productStock').value = '0';
+          if (productFormElement) productFormElement.reset();
+          const categoryField = $('productCategory'); if (categoryField) categoryField.value = 'General';
+          const stockField = $('productStock'); if (stockField) stockField.value = '0';
           await loadProducts();
           window.alert('Product added successfully.');
         } catch (error) {
-          setTextIfPresent('productError', error.message);
+          setText('productError', error.message);
           window.alert(`Could not add product: ${error.message}`);
         } finally {
           button.disabled = false;
@@ -907,14 +795,13 @@
 
       $('supplierForm').addEventListener('submit', async event => {
         event.preventDefault();
-        const formElement = event.currentTarget;
         $('supplierError').textContent = '';
         if (!getToken()) {
           $('supplierError').textContent = 'Login token not found in localStorage.';
           return;
         }
 
-        const form = new FormData(formElement);
+        const form = new FormData(event.currentTarget);
         const data = {
           productName:String(form.get('productName') || '').trim(),
           supplier:String(form.get('supplier') || ''),
@@ -926,7 +813,7 @@
         try {
           await apiRequest(API.suppliers, { method:'POST', headers:requestHeaders(true), body:JSON.stringify(data) });
           closeModal('supplierModal');
-          formElement.reset();
+          event.currentTarget.reset();
           await loadSuppliers();
           window.alert('Supplier tracking saved.');
         } catch (error) {
@@ -1301,12 +1188,12 @@
 
       // Dashboard tabs: keep each panel hidden unless its tab is active.
       const tabLinks = Array.from(document.querySelectorAll('.links a'));
-      const tabAliases = { overview:'overview', products:'products', listings:'listings', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
+      const tabAliases = { overview:'overview', products:'products', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
       function markPanels(selector, tabList) {
         document.querySelectorAll(selector).forEach(element => { element.dataset.dashboardTabs = tabList; });
       }
       markPanels('.welcome, .container > .stats, .container > section.panel:not([id])', 'overview');
-      markPanels('#inventory, #products', 'products listings');
+      markPanels('#inventory, #products', 'products');
       markPanels('#local-dropshipping', 'dropshipping');
       markPanels('#customers, #fraudPanel, #supportPanel', 'customers');
       markPanels('#couriers, .feature-grid > .panel:nth-child(2)', 'couriers');
@@ -1318,7 +1205,7 @@
       markPanels('.content-grid > section.panel', 'overview');
 
       function activateDashboardTab(tab, updateAddress = false) {
-        const validTabs = ['overview','products','listings','dropshipping','customers','couriers','cod','apps','ai'];
+        const validTabs = ['overview','products','dropshipping','customers','couriers','cod','apps','ai'];
         const activeTab = validTabs.includes(tab) ? tab : 'overview';
         document.querySelectorAll('[data-dashboard-tabs]').forEach(element => {
           const allowed = element.dataset.dashboardTabs.split(/\s+/);
@@ -1336,12 +1223,9 @@
       document.querySelector('.brand')?.addEventListener('click', event => {
         event.preventDefault();
         activateDashboardTab('overview', true);
-      });
-      tabLinks.forEach(link => link.addEventListener('click', event => {
+      });      tabLinks.forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
-        const tab = tabAliases[link.hash.slice(1)] || 'overview';
-        activateDashboardTab(tab, true);
-        if (tab === 'listings') openModal('productModal');
+        activateDashboardTab(tabAliases[link.hash.slice(1)] || 'overview', true);
       }));
       document.querySelectorAll('.actions a[href^="#"]').forEach(link => link.addEventListener('click', event => {
         const tab = tabAliases[link.hash.slice(1)];

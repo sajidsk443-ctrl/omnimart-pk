@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= product.name || product.title || 'Product' %> | OmniMart PK</title>
+  <style>
+    :root[data-theme="light"]{--page:#f4f7fb;--surface:rgba(255,255,255,.95);--surface-solid:#fff;--text:#0f172a;--muted:#64748b;--line:rgba(100,116,139,.15);--accent:#3b82f6;--accent2:#06b6d4;--shadow:0 10px 40px rgba(15,23,42,.08);--glow:rgba(59,130,246,.25)}
+    :root[data-theme="dark"]{--page:#0b0f19;--surface:rgba(20,27,45,.92);--surface-solid:#141b2d;--text:#f1f5f9;--muted:#94a3b8;--line:rgba(255,255,255,.08);--accent:#818cf8;--accent2:#22d3ee;--shadow:0 10px 40px rgba(0,0,0,.45);--glow:rgba(129,140,248,.3)}
+    :root[data-theme="crystal"]{--page:linear-gradient(135deg,#e0f2fe 0%,#f0f9ff 45%,#e0e7ff 100%);--surface:rgba(255,255,255,.78);--surface-solid:rgba(255,255,255,.95);--text:#0f172a;--muted:#475569;--line:rgba(56,189,248,.28);--accent:#0284c7;--accent2:#06b6d4;--shadow:0 15px 40px rgba(14,165,233,.12);--glow:rgba(56,189,248,.35)}
+    *{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;background:var(--page);background-attachment:fixed;color:var(--text);font:15px/1.6 system-ui,-apple-system,sans-serif}
+    a{color:inherit;text-decoration:none}
+    .announce{background:linear-gradient(90deg,#3b82f6,#06b6d4);color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:600}
+    .site-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:14px;padding:0 20px;height:64px;background:var(--surface);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
+    .brand{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:800}
+    .brand-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#06b6d4);color:#fff;font-weight:800}
+    .brand b{background:linear-gradient(115deg,#3b82f6,#06b6d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .nav-actions{margin-left:auto;display:flex;gap:12px;align-items:center;font-weight:600;font-size:13.5px}
+    .theme-select{padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface-solid);color:var(--text);font-weight:600}
+    .page-shell{width:min(1100px,calc(100% - 28px));margin:28px auto 60px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:36px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:var(--shadow)}
+    .img-wrap{position:relative;border-radius:16px;overflow:hidden;background:#000}
+    .main-img{width:100%;height:420px;object-fit:contain;cursor:zoom-in;transition:transform .3s}
+    .main-img.zoomed{transform:scale(1.6);cursor:zoom-out}
+    .detail-info h1{font-size:26px;font-weight:800;margin-bottom:10px}
+    .rating{color:var(--muted);margin-bottom:12px}.stars{color:#f59e0b}
+    .price{font-size:28px;font-weight:800;color:var(--accent);margin:14px 0}
+    .desc{color:var(--muted);line-height:1.7;margin-bottom:22px}
+    .btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:14px;background:var(--accent);color:#fff;font-weight:700;font-size:15px;border:none;cursor:pointer;width:100%;margin-bottom:12px;box-shadow:0 6px 20px var(--glow)}
+    .btn-wa{background:#25d366}
+    .trust-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;font-size:13px;color:var(--muted)}
+    .related{margin-top:40px}
+    .related h2{font-size:20px;margin-bottom:16px}
+    .related-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+    .related-card{background:var(--surface-solid);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+    .related-card img{width:100%;height:140px;object-fit:cover;border-radius:10px}
+    .related-card h3{font-size:14px;margin:8px 0 4px}
+    .related-card .price{font-size:15px}
+    .site-footer{padding:30px 40px;border-top:1px solid var(--line);background:var(--surface);color:var(--muted);text-align:center;margin-top:40px}
+    .modal-overlay{position:fixed;inset:0;background:rgba(11,15,25,.7);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px;isolation:isolate}
+    .modal-overlay.active{display:flex}
+    .modal-box{width:100%;max-width:400px;background:var(--surface-solid);border-radius:20px;padding:26px}
+    .form-group{margin-bottom:13px}
+    .form-group label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+    .form-group input{width:100%;height:44px;padding:0 13px;border-radius:11px;border:1px solid var(--line);background:var(--page);color:var(--text);font-size:14.5px;outline:none}
+    @media(max-width:768px){.detail-grid{grid-template-columns:1fr}.main-img{height:300px}}
+  </style>
+</head>
+<body>
+  <div class="announce">Free Delivery on orders above PKR 3,000 • Cash on Delivery Available Nationwide</div>
+  <header class="site-header">
+    <a class="brand" href="/"><span class="brand-mark">O</span><span>OmniMart <b>PK</b></span></a>
+    <nav class="nav-actions">
+      <a href="/">← Back to Home</a>
+      <select id="themeSelector" class="theme-select"><option value="dark">Dark</option><option value="light">Light</option><option value="crystal">Crystal</option></select>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <div class="detail-grid">
+      <div class="img-wrap">
+        <img class="main-img" id="mainImg" src="<%= product.imageUrl || product.image || 'https://placehold.co/600x600' %>" alt="<%= product.name || product.title %>" onclick="this.classList.toggle('zoomed')">
+      </div>
+      <div class="detail-info">
+        <h1><%= product.name || product.title %></h1>
+        <div class="rating"><span class="stars">★★★★★</span> <%= product.rating || '4.6' %> (<%= product.reviews || 128 %> reviews)</div>
+        <div class="price">PKR <%= Number(product.price || 0).toLocaleString("en-PK") %></div>
+        <p class="desc"><%= product.description || '100% اصل اور ویریفائیڈ پروڈکٹ۔ پاکستان بھر میں تیز ڈیلیوری اور کیش آن ڈیلیوری کی سہولت دستیاب ہے۔ 7 دن کی آسان واپسی کی گارنٹی۔' %></p>
+        
+        <button class="btn-primary" onclick="openOrderModal()">Buy It Now - Cash on Delivery</button>
+        <button class="btn-primary btn-wa" onclick="orderWhatsApp()">Order on WhatsApp</button>
+
+        <div class="trust-row">
+          <span>💵 COD Available</span>
+          <span>🚚 Fast Delivery</span>
+          <span>↩️ 7-Day Return</span>
+          <span>✅ 100% Authentic</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="related">
+      <h2>Related Products</h2>
+      <div class="related-grid">
+        <% if (typeof related !== 'undefined' && related.length) { %>
+          <% related.forEach(function(r){ %>
+            <a href="/product/<%= r._id || r.id %>" class="related-card">
+              <img src="<%= r.imageUrl || r.image || 'https://placehold.co/300x300' %>" alt="">
+              <h3><%= r.name || r.title %></h3>
+              <div class="price">PKR <%= Number(r.price||0).toLocaleString("en-PK") %></div>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <p style="color:var(--muted)">No related products.</p>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal for Express COD Order (Can also be used for Product Add Form if integrated) -->
+  <div class="modal-overlay" id="orderModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="orderModalTitle" tabindex="-1">
+    <div class="modal-box" id="orderBox">
+      <h3 id="orderModalTitle" style="margin-bottom:14px">Add New Product (HD Gallery Upload)</h3>
+      <form action="/add-product" method="POST" enctype="multipart/form-data">
+        <div class="form-group"><label>Product Name</label><input type="text" name="name" required placeholder="پروڈکٹ کا نام"></div>
+        <div class="form-group"><label>Description</label><input type="text" name="description" required placeholder="تفصیل"></div>
+        <div class="form-group"><label>Category</label><input type="text" name="category" required placeholder="کیٹیگری"></div>
+        <div class="form-group"><label>Price (PKR)</label><input type="number" name="price" required placeholder="قیمت"></div>
+        <div class="form-group"><label>Stock Quantity</label><input type="number" name="stock" placeholder="اسٹاک مقدار"></div>
+        <div class="form-group">
+          <label>Product Image / Video (HD Gallery)</label>
+          <input type="file" name="productMedia" accept="image/*,video/*" required style="padding:6px; background:var(--page);">
+        </div>
+        <button type="submit" class="btn-primary">Upload & Add Product</button>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <p>OmniMart PK • Cash on Delivery across Pakistan</p>
+  </footer>
+
+  <script>
+    const selector = document.getElementById('themeSelector');
+    const saved = localStorage.getItem('omnimart_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    selector.value = saved;
+    selector.onchange = e => { document.documentElement.setAttribute('data-theme', e.target.value); localStorage.setItem('omnimart_theme', e.target.value); };
+
+    const orderModal = document.getElementById('orderModal');
+    function openOrderModal(){
+      if (!orderModal) return;
+      orderModal.classList.add('active');
+      orderModal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      orderModal.querySelector('input,button,select,textarea')?.focus();
+    }
+    function closeOrderModal(){
+      if (!orderModal) return;
+      orderModal.classList.remove('active');
+      orderModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    orderModal?.addEventListener('click', event => { if (event.target === orderModal) closeOrderModal(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && orderModal?.classList.contains('active')) closeOrderModal(); });
+
+    function orderWhatsApp(){
+      const name = "<%= (product.name || product.title || '').replace(/"/g, '\\"') %>";
+      const price = "<%= product.price || 0 %>";
+      const text = `Hi OmniMart PK! I want to order: ${name} - PKR ${price}`;
+      window.open(`https://wa.me/923144039790?text=${encodeURIComponent(text)}`, '_blank');
+    }
+  </script>
+</body>
+</html>

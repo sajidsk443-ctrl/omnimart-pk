@@ -9,9 +9,18 @@ const multer = require('multer');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+// Cloudinary اور Multer Storage لائبریریز
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Cloudinary کنفیگریشن (.env فائل سے تفصیلات خود بخود اٹھائے گا)
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY || process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET || process.env.CLOUDINARY_API_SECRET
+});
+
 const Product = require('./models/Product');
-// User is optional at startup so the rest of the storefront remains available
-// in deployments where authentication is provided by another service.
 let User = null;
 try {
   User = mongoose.models.User || require('./models/User');
@@ -21,17 +30,15 @@ try {
 
 let bcrypt = null;
 try { bcrypt = require('bcrypt'); } catch (_) {
-  try { bcrypt = require('bcryptjs'); } catch (_) { /* comparePassword may be provided by User */ }
+  try { bcrypt = require('bcryptjs'); } catch (_) { /* comparePassword */ }
 }
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
 const PUBLIC_DIR = path.join(__dirname, 'public');
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(PUBLIC_DIR, 'uploads');
 const MAX_MEDIA_FILES = 10;
 const MAX_FILE_SIZE = Number(process.env.MAX_MEDIA_FILE_BYTES) || 50 * 1024 * 1024;
 
-fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.set('view engine', 'ejs');
@@ -50,8 +57,7 @@ async function verifyLoginPassword(user, submittedPassword) {
   return bcrypt.compare(submittedPassword, storedHash);
 }
 
-// Authentication API always responds with JSON, including malformed input,
-// unavailable auth configuration, invalid credentials, and unexpected errors.
+// Authentication API
 app.post(['/api/auth/login', '/api/login'], async (req, res) => {
   try {
     if (!User) return jsonAuthFailure(res, 503, 'Login is not configured: models/User.js was not found.');
@@ -89,21 +95,19 @@ app.post(['/api/auth/login', '/api/login'], async (req, res) => {
   }
 });
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, callback) => callback(null, UPLOAD_DIR),
-  filename: (_req, file, callback) => {
-    const extension = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 12);
-    callback(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
+// Cloudinary Storage (مقامی لوکل ڈسک کے بجائے کلاؤڈ پر اپلوڈ کرے گا)
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'omnimart_products',
+    resource_type: 'auto',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'avi']
   }
 });
 
 const upload = multer({
   storage,
-  limits: { files: MAX_MEDIA_FILES, fileSize: MAX_FILE_SIZE },
-  fileFilter: (_req, file, callback) => {
-    const allowed = file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/');
-    callback(allowed ? null : new Error('Only image and video files are allowed.'), allowed);
-  }
+  limits: { files: MAX_MEDIA_FILES, fileSize: MAX_FILE_SIZE }
 });
 
 function requireAdmin(req, res, next) {
@@ -125,15 +129,11 @@ function requireAdmin(req, res, next) {
   }
 }
 
-async function deleteUploaded(files = []) {
-  await Promise.all(files.map(file => fs.promises.unlink(file.path).catch(() => {})));
-}
-
 function uploadedMedia(files) {
   return files.map(file => ({
     originalName: file.originalname,
-    filename: file.filename,
-    path: `/uploads/${file.filename}`,
+    filename: file.filename || file.public_id,
+    path: file.path, // Cloudinary URL
     mimeType: file.mimetype,
     mediaType: file.mimetype.startsWith('video/') ? 'video' : 'image',
     size: file.size
@@ -145,7 +145,6 @@ async function createProduct(req, res, next, respondWithJson) {
   try {
     const { name, description, category, price, stock } = req.body;
     if (!String(name || '').trim() || !String(category || '').trim() || price === undefined || price === '' || stock === undefined || stock === '') {
-      await deleteUploaded(files);
       return respondWithJson
         ? res.status(400).json({ message: 'Name, category, price, and stock are required.' })
         : res.status(400).send('Name, category, price, and stock are required.');
@@ -159,7 +158,6 @@ async function createProduct(req, res, next, respondWithJson) {
     const numericPrice = Number(price);
     const numericStock = Number(stock || 0);
     if (!Number.isFinite(numericPrice) || numericPrice < 0 || !Number.isInteger(numericStock) || numericStock < 0) {
-      await deleteUploaded(files);
       return respondWithJson
         ? res.status(400).json({ message: 'Enter a valid price and whole-number stock quantity.' })
         : res.status(400).send('Enter a valid price and whole-number stock quantity.');
@@ -168,7 +166,6 @@ async function createProduct(req, res, next, respondWithJson) {
     const sellerId = req.admin.id || req.admin._id || req.admin.userId || req.admin.sub ||
       req.admin.user?.id || req.admin.user?._id || req.admin.user?.userId;
     if (!sellerId || !mongoose.isValidObjectId(sellerId)) {
-      await deleteUploaded(files);
       return respondWithJson
         ? res.status(401).json({ message: 'Admin token does not include a valid user ID.' })
         : res.status(401).send('Admin token does not include a valid user ID.');
@@ -182,7 +179,7 @@ async function createProduct(req, res, next, respondWithJson) {
       category: String(category).trim(),
       price: numericPrice,
       stock: numericStock,
-      imageUrl: firstImage ? firstImage.path : '',
+      imageUrl: firstImage ? firstImage.path : (mediaFiles[0] ? mediaFiles[0].path : ''),
       seller: sellerId,
       mediaFiles,
       media: mediaFiles.map(media => media.path)
@@ -192,25 +189,37 @@ async function createProduct(req, res, next, respondWithJson) {
     if (respondWithJson) return res.status(201).json({ message: 'Product created successfully.', product });
     return res.redirect('/');
   } catch (error) {
-    await deleteUploaded(files);
     return next(error);
   }
 }
 
-// Home page: render the existing catalog with the complete media array.
-app.get('/', async (_req, res) => {
-  try {
-    const products = await Product.find().sort({ createdAt: -1 }).lean();
-    return res.render('index', { products });
-  } catch (error) {
-    console.error('Error loading homepage products:', error);
-    return res.status(500).render('index', { products: [] });
-  }
+// Storefront routes
+app.get('/', (_req, res, next) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'), error => {
+    if (error) next(error);
+  });
+});
+
+app.get(['/admin', '/admin.html'], (_req, res, next) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'admin.html'), error => {
+    if (error) next(error);
+  });
 });
 
 app.get('/add-listing', requireAdmin, (_req, res) => res.render('add-listing'));
 
-// Admin product listing API used by the dashboard.
+app.get('/api/catalog/products', async (_req, res, next) => {
+  try {
+    const products = await Product.find({ active: { $ne: false } })
+      .select('name description category price stock imageUrl mediaFiles media createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    return res.json({ products });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.get('/api/products', requireAdmin, async (_req, res, next) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 }).lean();
@@ -220,12 +229,10 @@ app.get('/api/products', requireAdmin, async (_req, res, next) => {
   }
 });
 
-// Both admin upload paths accept the same multiple-file field and enforce JWT auth.
 app.post('/api/products', requireAdmin, upload.array('mediaFiles', MAX_MEDIA_FILES), (req, res, next) => {
   createProduct(req, res, next, true);
 });
 
-// Admin product deletion used by the dashboard's per-row Delete action.
 app.delete('/api/products/:id', requireAdmin, async (req, res, next) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
@@ -233,20 +240,12 @@ app.delete('/api/products/:id', requireAdmin, async (req, res, next) => {
     }
     const product = await Product.findByIdAndDelete(req.params.id);
     if (!product) return res.status(404).json({ success: false, message: 'Product not found.' });
-
-    const paths = new Set([
-      ...(Array.isArray(product.mediaFiles) ? product.mediaFiles.map(item => item.path) : []),
-      ...(Array.isArray(product.media) ? product.media : [])
-    ]);
-    await Promise.all([...paths].map(mediaPath => {
-      const filename = path.basename(String(mediaPath || ''));
-      return filename ? fs.promises.unlink(path.join(UPLOAD_DIR, filename)).catch(() => {}) : Promise.resolve();
-    }));
     return res.json({ success: true, message: 'Product deleted.' });
   } catch (error) {
     return next(error);
   }
 });
+
 app.post('/add-product', requireAdmin, upload.array('mediaFiles', MAX_MEDIA_FILES), (req, res, next) => {
   createProduct(req, res, next, false);
 });
@@ -263,41 +262,13 @@ app.get('/product/:id', async (req, res) => {
   }
 });
 
-// Static storefront assets, plus file access for local disk or a mounted Render disk.
-app.use('/uploads', express.static(UPLOAD_DIR, { fallthrough: false, dotfiles: 'deny' }));
 app.use(express.static(PUBLIC_DIR, { index: false }));
-
-// Do not let Express return its default HTML 404 for API URLs.
 app.use('/api', (_req, res) => jsonAuthFailure(res, 404, 'API endpoint not found.'));
+app.use((_req, res) => res.status(404).send('Page not found.'));
 
 app.use((error, _req, res, _next) => {
-  if (_req.path && _req.path.startsWith('/api/')) {
-    if (error instanceof multer.MulterError) {
-      const tooLarge = error.code === 'LIMIT_FILE_SIZE';
-      const tooMany = error.code === 'LIMIT_FILE_COUNT';
-      return res.status(tooLarge ? 413 : 400).json({
-        success: false,
-        message: tooMany ? `You can upload at most ${MAX_MEDIA_FILES} files at once.`
-          : tooLarge ? `Each file must be no larger than ${Math.floor(MAX_FILE_SIZE / (1024 * 1024))} MB.`
-            : error.message
-      });
-    }
-    return jsonAuthFailure(res, 400, error.type === 'entity.parse.failed' ? 'Request body contains invalid JSON.' : 'Request could not be processed.');
-  }
-  if (error instanceof multer.MulterError) {
-    const tooLarge = error.code === 'LIMIT_FILE_SIZE';
-    const tooMany = error.code === 'LIMIT_FILE_COUNT';
-    return res.status(tooLarge ? 413 : 400).json({
-      message: tooMany ? `You can upload at most ${MAX_MEDIA_FILES} files at once.`
-        : tooLarge ? `Each file must be no larger than ${Math.floor(MAX_FILE_SIZE / (1024 * 1024))} MB.`
-          : error.message
-    });
-  }
-  if (error.message === 'Only image and video files are allowed.') {
-    return res.status(400).json({ message: error.message });
-  }
   console.error('Request error:', error);
-  return res.status(500).json({ message: 'Server Error' });
+  return res.status(500).json({ message: error.message || 'Server Error' });
 });
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/omnimart')
