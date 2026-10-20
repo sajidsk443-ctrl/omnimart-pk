@@ -160,6 +160,21 @@
     tbody tr:last-child td { border-bottom:0; }
     .product-cell { display:flex; align-items:center; gap:8px; font-weight:650; }
     .product-image { width:36px; height:36px; object-fit:cover; border:1px solid var(--border); border-radius:8px; background:var(--surface-alt); }
+
+    .catalog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-top:16px; }
+    .catalog-card { overflow:hidden; border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:var(--shadow); }
+    .catalog-media { height:165px; display:grid; place-items:center; overflow:hidden; background:var(--surface-alt); }
+    .catalog-media img,.catalog-media video { width:100%; height:100%; object-fit:cover; }
+    .catalog-media .no-media { color:var(--muted); font-size:12px; }
+    .catalog-body { padding:13px; }
+    .catalog-body h3 { margin:0 0 5px; font-size:15px; }
+    .catalog-description { min-height:36px; margin:0 0 10px; color:var(--muted); font-size:12px; }
+    .catalog-meta { display:flex; justify-content:space-between; gap:8px; margin:8px 0 12px; font-size:12px; }
+    .catalog-actions { display:flex; gap:7px; }
+    .catalog-actions .small-button { flex:1; padding:8px; }
+    .catalog-actions .delete-product { color:var(--danger); border-color:color-mix(in srgb,var(--danger) 40%,var(--border)); }
+    .existing-media { display:flex; flex-wrap:wrap; gap:7px; margin:0 0 12px; }
+    .existing-media img,.existing-media video { width:58px; height:48px; object-fit:cover; border-radius:6px; border:1px solid var(--border); }
     .pill { display:inline-flex; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:650; background:var(--accent-soft); color:var(--accent-strong); }
     .pill.low { background:color-mix(in srgb,var(--warning) 14%,var(--surface)); color:var(--warning); }
     .pill.danger { background:color-mix(in srgb,var(--danger) 12%,var(--surface)); color:var(--danger); }
@@ -271,7 +286,7 @@
     <div class="nav">
       <a class="brand" href="#overview"><span class="brand-mark">▦</span><span>OmniMart PK</span><span class="admin-badge">Admin Suite</span></a>
       <nav class="links" aria-label="Main navigation">
-        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#local-dropshipping">Dropshipping</a>
+        <a href="#overview">Overview</a><a href="#products">Products</a><a href="#listing">Listing</a><a href="#local-dropshipping">Dropshipping</a>
         <a href="#customers">Customers</a><a href="#couriers">Couriers</a><a href="#cod">COD</a>
         <a href="#apps">Apps</a><a href="#assistant">AI</a>
       </nav>
@@ -319,7 +334,7 @@
 
     <section class="panel" id="products">
       <div class="panel-head"><h2>Product Catalog</h2><button class="button button-primary" id="openProductModal" type="button">＋ Add product</button></div>
-      <span class="subtle">Products are loaded from your catalog API and shown above.</span>
+      <p class="subtle" id="catalogMessage">Loading products…</p><div class="catalog-grid" id="productGrid" aria-live="polite"></div>
     </section>
 
     <section class="panel" id="local-dropshipping">
@@ -399,8 +414,9 @@
           <div class="panel-head"><h2>✦ OmniMart AI Assistant</h2><span class="pill">Ready</span></div>
           <p class="subtle">Ask a question about your dashboard or store.</p>
           <div class="chat-log" id="chatLog" role="log" aria-live="polite"><div class="message"><strong>OmniMart AI</strong>Hello Sajid! I can help you review your dashboard.</div></div>
+          <p class="hint">Need a person? <a href="https://wa.me/923144039790?text=Hello%20OmniMart%20support" target="_blank" rel="noopener noreferrer">Chat with OmniMart support on WhatsApp</a>.</p>
           <form class="chat-form" id="chatForm"><input id="chatInput" maxlength="500" placeholder="Ask me something…" aria-label="Message the AI assistant"><button class="send" type="submit">Send</button></form>
-          <p class="hint">Demo assistant · not connected to an AI service.</p>
+          <p class="hint">Quick store guidance with a direct WhatsApp handoff to support.</p>
         </section>
       </aside>
     </div>
@@ -420,12 +436,14 @@
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
       <div class="modal-head"><div><h2 id="productModalTitle">Add new product</h2><span class="subtle">Add a product to your catalog.</span></div><button class="modal-close" type="button" data-close="productModal" aria-label="Close">×</button></div>
       <form id="productForm" enctype="multipart/form-data">
+        <input id="editingProductId" type="hidden">
+        <div id="existingMedia" class="existing-media" aria-label="Current product media"></div>
         <div class="field"><label for="productName">Product name</label><input id="productName" name="name" required maxlength="120"></div>
         <div class="field"><label for="productDescription">Description</label><textarea id="productDescription" name="description" maxlength="1000"></textarea></div>
         <div class="field"><label for="productCategory">Category</label><input id="productCategory" name="category" value="General" required></div>
         <div class="field"><label for="productPrice">Price (PKR)</label><input id="productPrice" name="price" type="number" min="0" step="0.01" required></div>
         <div class="field"><label for="productStock">Stock quantity</label><input id="productStock" name="stock" type="number" min="0" step="1" value="0" required></div>
-        <div class="field"><label for="productMedia">HD image or promotional video</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" required></div>
+        <div class="field"><label for="productMedia">HD image or promotional video</label><input id="productMedia" name="mediaFiles" type="file" accept="image/*,video/*" multiple><span class="hint" id="mediaHint">Choose up to 10 HD images or videos (max 50 MB each).</span></div>
         <p class="form-error" id="productError" role="alert"></p>
         <div class="modal-actions"><button class="button" type="button" data-close="productModal">Cancel</button><button class="button button-primary" id="saveProduct" type="submit">Save product</button></div>
       </form>
@@ -594,7 +612,51 @@
         }
       });
 
-      $('openProductModal').addEventListener('click', () => openModal('productModal'));
+      function resetProductEditor() {
+        $('productForm').reset();
+        $('editingProductId').value = '';
+        $('productModalTitle').textContent = 'Add new product';
+        $('productModal').querySelector('.modal-head .subtle').textContent = 'Add a product to your catalog.';
+        $('saveProduct').textContent = 'Save product';
+        $('productMedia').required = true;
+        $('productMedia').dataset.remainingFiles = '10';
+        $('mediaHint').textContent = 'Choose up to 10 HD images or videos (max 50 MB each).';
+        $('existingMedia').replaceChildren();
+        $('productCategory').value = 'General'; $('productStock').value = '0';
+        setText('productError','');
+      }
+      function openProductEditor(product) {
+        resetProductEditor();
+        $('editingProductId').value = String(product._id || product.id || '');
+        $('productName').value = product.name || '';
+        $('productDescription').value = product.description || '';
+        $('productCategory').value = product.category || 'General';
+        $('productPrice').value = product.price ?? '';
+        $('productStock').value = Number(product.stock) || 0;
+        $('productModalTitle').textContent = 'Edit product';
+        $('productModal').querySelector('.modal-head .subtle').textContent = 'Update product details or add more media.';
+        $('saveProduct').textContent = 'Save changes';
+        $('productMedia').required = false;
+        const currentMediaCount = Array.isArray(product.mediaFiles) && product.mediaFiles.length ? product.mediaFiles.length : Array.isArray(product.media) && product.media.length ? product.media.length : product.imageUrl ? 1 : 0;
+        $('productMedia').dataset.remainingFiles = String(Math.max(0, 10 - currentMediaCount));
+        $('mediaHint').textContent = `Current media is retained. Select up to ${$('productMedia').dataset.remainingFiles} additional images or videos (max 50 MB each).`;
+        const existing = Array.isArray(product.mediaFiles) ? product.mediaFiles : [];
+        const oldMedia = existing.length ? existing.map(item => ({url:item.path || item.url, type:item.mediaType || (String(item.mimeType || '').startsWith('video/') ? 'video' : 'image')})) : (Array.isArray(product.media) ? product.media.map(url => ({url,type:/\.(mp4|mov|avi|webm)(\?|$)/i.test(String(url))?'video':'image'})) : []);
+        if (!oldMedia.length && product.imageUrl) oldMedia.push({url:product.imageUrl,type:'image'});
+        oldMedia.forEach(item => { if (!item.url) return; const el=document.createElement(item.type==='video'?'video':'img'); el.src=item.url; if(item.type==='video'){el.controls=true;el.preload='metadata';} else el.alt='Current product media'; $('existingMedia').append(el); });
+        openModal('productModal');
+      }
+      async function deleteProduct(id, card) {
+        if (!id || !getToken()) { window.alert('Admin login token is missing. Sign in again.'); return; }
+        if (!window.confirm('Delete this product? This removes its MongoDB record.')) return;
+        const button = card.querySelector('.delete-product'); button.disabled = true;
+        try {
+          await apiRequest(`${API.products}/${encodeURIComponent(id)}`, { method:'DELETE', headers:requestHeaders() });
+          card.remove(); productsById.delete(id); loadedProducts = loadedProducts.filter(product => String(product._id || product.id) !== id);
+          renderProducts(loadedProducts);
+        } catch (error) { window.alert(`Could not delete product: ${error.message}`); button.disabled = false; }
+      }
+      $('openProductModal').addEventListener('click', () => { resetProductEditor(); openModal('productModal'); });
       $('openSupplierModal').addEventListener('click', () => openModal('supplierModal'));
 
       function addCell(row, value) {
@@ -657,8 +719,16 @@
           : '—';
       }
 
+      let loadedProducts = [];
+      const productsById = new Map();
+
       function renderProducts(products) {
+        loadedProducts = products;
+        productsById.clear();
+        products.forEach(product => productsById.set(String(product._id || product.id), product));
         const body = $('productRows');
+        const grid = $('productGrid');
+        if (grid) grid.replaceChildren();
         body.replaceChildren();
 
         products.forEach(product => {
@@ -695,6 +765,41 @@
           body.append(row);
         });
 
+        products.forEach(product => {
+          const id = String(product._id || product.id || '');
+          const card = document.createElement('article');
+          card.className = 'catalog-card';
+          card.dataset.productId = id;
+          const media = document.createElement('div');
+          media.className = 'catalog-media';
+          const mediaList = Array.isArray(product.mediaFiles) ? product.mediaFiles : [];
+          const primary = mediaList[0];
+          const mediaUrl = primary?.path || primary?.url || product.imageUrl || (Array.isArray(product.media) ? product.media[0] : '');
+          const isVideo = primary?.mediaType === 'video' || String(primary?.mimeType || '').startsWith('video/') || /\.(mp4|mov|avi|webm)(\?|$)/i.test(String(mediaUrl));
+          if (mediaUrl && isVideo) {
+            const video = document.createElement('video'); video.src = mediaUrl; video.controls = true; video.preload = 'metadata'; media.append(video);
+          } else if (mediaUrl) {
+            const image = document.createElement('img'); image.src = mediaUrl; image.alt = product.name || 'Product image'; image.loading = 'lazy';
+            image.addEventListener('error', () => { media.replaceChildren(); const empty=document.createElement('span'); empty.className='no-media'; empty.textContent='Media unavailable'; media.append(empty); }, { once:true });
+            media.append(image);
+          } else { const empty=document.createElement('span'); empty.className='no-media'; empty.textContent='No product media'; media.append(empty); }
+          const content = document.createElement('div'); content.className = 'catalog-body';
+          const title = document.createElement('h3'); title.textContent = product.name || 'Unnamed product';
+          const description = document.createElement('p'); description.className = 'catalog-description'; description.textContent = product.description || 'No description';
+          const category = document.createElement('span'); category.className = 'pill'; category.textContent = product.category || 'General';
+          const meta = document.createElement('div'); meta.className = 'catalog-meta';
+          const price = document.createElement('strong'); price.textContent = money(product.price);
+          const stock = document.createElement('span'); stock.textContent = `Stock: ${Number(product.stock) || 0}`;
+          meta.append(price, stock);
+          const actions = document.createElement('div'); actions.className = 'catalog-actions';
+          const edit = document.createElement('button'); edit.type = 'button'; edit.className = 'small-button'; edit.textContent = 'Edit'; edit.addEventListener('click', () => openProductEditor(product));
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'small-button delete-product'; remove.textContent = 'Delete'; remove.addEventListener('click', () => deleteProduct(id, card));
+          actions.append(edit, remove);
+          content.append(title, description, category, meta, actions);
+          card.append(media, content); if (grid) grid.append(card);
+        });
+        setText('catalogMessage', products.length ? `${products.length} product${products.length === 1 ? '' : 's'} in your catalog.` : 'No products yet. Use “Add product” to create your first listing.');
+
         const low = products.filter(product => Number(product.stock) < LOW_STOCK_THRESHOLD);
         setText('activeProductCount', String(products.length));
         setText('lowStockCount', String(low.length));
@@ -713,10 +818,11 @@
       async function loadProducts() {
         setText('productMessage', 'Loading product catalog…');
         try {
-          const result = await apiRequest(API.products);
+          const result = await apiRequest(API.products, { headers:requestHeaders() });
           renderProducts(asArray(result, 'products'));
         } catch (error) {
           setText('productMessage', error.message);
+          setText('catalogMessage', `Could not load products: ${error.message}`);
           setText('activeProductCount', '—');
           setText('lowStockCount', '—');
           const alert = $('stockAlert'); if (alert) alert.classList.remove('visible');
@@ -739,32 +845,31 @@
           category:String(form.get('category') || 'General').trim(),
           price:Number(form.get('price')),
           stock:Number(form.get('stock')),
-          mediaFile:form.get('mediaFiles')
+          mediaFiles:form.getAll('mediaFiles').filter(file => file && file.size)
         };
+        const editingId = $('editingProductId').value;
 
-        if (!product.name || !product.category || !product.mediaFile || !product.mediaFile.size || !Number.isFinite(product.price) ||
+        if (!product.name || !product.category || (!editingId && !product.mediaFiles.length) || product.mediaFiles.length > Number($('productMedia').dataset.remainingFiles || 10) || !Number.isFinite(product.price) ||
             product.price < 0 || !Number.isInteger(product.stock) || product.stock < 0) {
-          setText('productError', 'Enter a name, category, valid price and whole-number stock quantity, and select an image or video file.');
+          setText('productError', 'Enter a name, category, valid price and whole-number stock quantity. New products need media; edits can keep existing media.');
           return;
         }
 
         const button = $('saveProduct');
         button.disabled = true;
         try {
-          await apiRequest(API.products, {
-            method:'POST',
+          await apiRequest(editingId ? `${API.products}/${encodeURIComponent(editingId)}` : API.products, {
+            method:editingId ? 'PUT' : 'POST',
             headers:requestHeaders(),
             body:form
           });
           closeModal('productModal');
-          if (productFormElement) productFormElement.reset();
-          const categoryField = $('productCategory'); if (categoryField) categoryField.value = 'General';
-          const stockField = $('productStock'); if (stockField) stockField.value = '0';
+          resetProductEditor();
           await loadProducts();
-          window.alert('Product added successfully.');
+          window.alert(editingId ? 'Product updated successfully.' : 'Product added successfully.');
         } catch (error) {
           setText('productError', error.message);
-          window.alert(`Could not add product: ${error.message}`);
+          window.alert(`Could not ${editingId ? 'update' : 'add'} product: ${error.message}`);
         } finally {
           button.disabled = false;
         }
@@ -1183,17 +1288,18 @@
         if (!text) return;
         addChatMessage('You', text, true);
         input.value = '';
-        window.setTimeout(() => addChatMessage('OmniMart AI', 'This demo assistant is not connected to an AI service yet.', false), 300);
+        window.setTimeout(() => addChatMessage('OmniMart AI', 'I can help with product listings, delivery, COD, and returns. For a person, use WhatsApp support below.', false), 300);
       });
 
       // Dashboard tabs: keep each panel hidden unless its tab is active.
       const tabLinks = Array.from(document.querySelectorAll('.links a'));
-      const tabAliases = { overview:'overview', products:'products', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
+      const tabAliases = { overview:'overview', products:'products', listing:'listing', 'local-dropshipping':'dropshipping', customers:'customers', couriers:'couriers', cod:'cod', apps:'apps', assistant:'ai' };
       function markPanels(selector, tabList) {
         document.querySelectorAll(selector).forEach(element => { element.dataset.dashboardTabs = tabList; });
       }
       markPanels('.welcome, .container > .stats, .container > section.panel:not([id])', 'overview');
-      markPanels('#inventory, #products', 'products');
+      markPanels('#inventory', 'products');
+      markPanels('#products', 'products listing');
       markPanels('#local-dropshipping', 'dropshipping');
       markPanels('#customers, #fraudPanel, #supportPanel', 'customers');
       markPanels('#couriers, .feature-grid > .panel:nth-child(2)', 'couriers');
@@ -1205,7 +1311,7 @@
       markPanels('.content-grid > section.panel', 'overview');
 
       function activateDashboardTab(tab, updateAddress = false) {
-        const validTabs = ['overview','products','dropshipping','customers','couriers','cod','apps','ai'];
+        const validTabs = ['overview','products','listing','dropshipping','customers','couriers','cod','apps','ai'];
         const activeTab = validTabs.includes(tab) ? tab : 'overview';
         document.querySelectorAll('[data-dashboard-tabs]').forEach(element => {
           const allowed = element.dataset.dashboardTabs.split(/\s+/);
@@ -1248,3 +1354,4 @@
   </script>
 </body>
 </html>
+
